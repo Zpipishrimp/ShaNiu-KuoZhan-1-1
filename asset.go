@@ -67,6 +67,50 @@ func init() {
 			},
 		},
 		{
+			Rules: []string{`raw 查询`},
+			Handle: func(s im.Sender) interface{} {
+				envs, err := qinglong.GetEnvs("JD_COOKIE")
+				if err != nil {
+					return err
+				}
+				if len(envs) == 0 {
+					return "暂时无法查询。"
+				}
+				cks := []JdCookie{}
+				for _, env := range envs {
+					pt_key := FetchJdCookieValue("pt_key", env.Value)
+					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
+					pinQQ.Foreach(func(k, v []byte) error {
+						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
+							cks = append(cks, JdCookie{
+								PtKey: pt_key,
+								PtPin: pt_pin,
+								Note:  env.Remarks,
+							})
+						}
+						return nil
+					})
+					pinTG.Foreach(func(k, v []byte) error {
+						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
+							cks = append(cks, JdCookie{
+								PtKey: pt_key,
+								PtPin: pt_pin,
+								Note:  env.Remarks,
+							})
+						}
+						return nil
+					})
+				}
+				if len(cks) == 0 {
+					return "你尚未绑定🐶东账号，请私聊我你的账号信息。"
+				}
+				for _, ck := range cks {
+					go s.Reply(ck.QueryAsset())
+				}
+				return nil
+			},
+		},
+		{
 			Rules: []string{`today bean(?)`},
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
@@ -390,20 +434,20 @@ func (ck *JdCookie) QueryAsset() string {
 		}
 		msgs = append(msgs, fmt.Sprintf("推一推券：%s", <-tyt))
 		msgs = append(msgs, fmt.Sprintf("惊喜牧场：%d枚鸡蛋🥚", <-egg))
-		if ck.Note != "" {
-			msgs = append([]string{
-				fmt.Sprintf("账号备注：%s", ck.Note),
-			}, msgs...)
-		}
+		// if ck.Note != "" {
+		// 	msgs = append([]string{
+		// 		fmt.Sprintf("账号备注：%s", ck.Note),
+		// 	}, msgs...)
+		// }
 		msgs = append([]string{
 			fmt.Sprintf("账号昵称：%s", ck.Nickname),
 		}, msgs...)
 	} else {
 		ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
 		msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
-		if ck.Note != "" {
-			msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
-		}
+		// if ck.Note != "" {
+		// 	msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
+		// }
 		msgs = append(msgs, []string{
 			"提醒：该账号已过期，请重新登录",
 		}...)

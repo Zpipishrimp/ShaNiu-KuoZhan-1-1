@@ -8,17 +8,25 @@ import (
 	"github.com/cdle/sillyGirl/im"
 )
 
+var pinQQ = core.NewBucket("pinQQ")
+var pinTG = core.NewBucket("pinTG")
+
 func init() {
 	core.AddCommand("", []core.Function{
 		{
 			Rules:   []string{`raw pt_key=([^;=\s]+);pt_pin=([^;=\s]+)`},
-			Admin:   true,
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", s.Get(0), s.Get(1))
 				envs, err := qinglong.GetEnvs(fmt.Sprintf(";pt_pin=%s;", s.Get(1)))
 				if err != nil {
 					return err
+				}
+				if s.GetImType() == "qq" {
+					pinQQ.Set(s.Get(1), s.GetUserID())
+				}
+				if s.GetImType() == "tg" {
+					pinTG.Set(s.Get(1), s.GetUserID())
 				}
 				if len(envs) == 0 {
 					if err := qinglong.AddEnv(qinglong.Env{
@@ -40,13 +48,18 @@ func init() {
 		},
 		{
 			Rules:   []string{`raw pin=([^;=\s]+);wskey=([^;=\s]+)`},
-			Admin:   true,
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
 				envs, err := qinglong.GetEnvs(fmt.Sprintf("pin=%s;wskey=", s.Get(0)))
 				if err != nil {
 					return err
+				}
+				if s.GetImType() == "qq" {
+					pinQQ.Set(s.Get(1), s.GetUserID())
+				}
+				if s.GetImType() == "tg" {
+					pinTG.Set(s.Get(1), s.GetUserID())
 				}
 				if len(envs) == 0 {
 					if err := qinglong.AddEnv(qinglong.Env{
