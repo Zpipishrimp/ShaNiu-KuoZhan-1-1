@@ -8,10 +8,11 @@ import (
 func init() {
 	core.AddCommand("jd", []core.Function{
 		{
-			Rules: []string{"update"},
+			Rules: []string{"raw ^jd update$"},
 			Cron:  "41 * * * *",
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(name + "开始拉取代码。")
+
 				need, err := core.GitPull("develop/jd_cookie")
 				if err != nil {
 					return err
