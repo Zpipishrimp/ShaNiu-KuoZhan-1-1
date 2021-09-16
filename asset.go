@@ -86,10 +86,12 @@ func init() {
 						return nil
 					})
 					pinTG.Foreach(func(k, v []byte) error {
-						core.Push("tg", core.Int(string(v)), (&JdCookie{
-							PtKey: pt_key,
-							PtPin: pt_pin,
-						}).QueryAsset())
+						if string(k) == pt_pin {
+							core.Push("tg", core.Int(string(v)), (&JdCookie{
+								PtKey: pt_key,
+								PtPin: pt_pin,
+							}).QueryAsset())
+						}
 						return nil
 					})
 				}
