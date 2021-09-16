@@ -73,24 +73,31 @@ func init() {
 			Admin: true,
 			Handle: func(_ im.Sender) interface{} {
 				envs, _ := qinglong.GetEnvs("JD_COOKIE")
+				assets := map[string]string{}
+				getAsset := func(pt_pin, pt_key string) string {
+					if asset, ok := assets[pt_pin]; ok {
+						return asset
+					}
+					asset := (&JdCookie{
+						PtKey: pt_key,
+						PtPin: pt_pin,
+					}).QueryAsset()
+
+					assets[pt_pin] = asset
+					return asset
+				}
 				for _, env := range envs {
 					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
 					pinQQ.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin {
-							core.Push("qq", core.Int(string(v)), (&JdCookie{
-								PtKey: pt_key,
-								PtPin: pt_pin,
-							}).QueryAsset())
+							core.Push("qq", core.Int(string(v)), getAsset(pt_pin, pt_key))
 						}
 						return nil
 					})
 					pinTG.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin {
-							core.Push("tg", core.Int(string(v)), (&JdCookie{
-								PtKey: pt_key,
-								PtPin: pt_pin,
-							}).QueryAsset())
+							core.Push("tg", core.Int(string(v)), getAsset(pt_pin, pt_key))
 						}
 						return nil
 					})
