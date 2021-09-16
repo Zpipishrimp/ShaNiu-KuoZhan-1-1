@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -67,7 +68,7 @@ func init() {
 			},
 		},
 		{
-			Rules: []string{`raw 查询`},
+			Rules: []string{`raw ^查询$`},
 			Handle: func(s im.Sender) interface{} {
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -303,7 +304,9 @@ var Float64 = func(s string) float64 {
 func (ck *JdCookie) QueryAsset() string {
 	msgs := []string{}
 	if ck.Note != "" {
-		msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
+		if runtime.GOOS != "darwin" {
+			msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
+		}
 	}
 	asset := Asset{}
 	if ck.Available() {
@@ -439,15 +442,16 @@ func (ck *JdCookie) QueryAsset() string {
 		// 		fmt.Sprintf("账号备注：%s", ck.Note),
 		// 	}, msgs...)
 		// }
-		msgs = append([]string{
-			fmt.Sprintf("账号昵称：%s", ck.Nickname),
-		}, msgs...)
+		if runtime.GOOS != "darwin" {
+			msgs = append([]string{
+				fmt.Sprintf("账号昵称：%s", ck.Nickname),
+			}, msgs...)
+		}
 	} else {
 		ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
-		msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
-		// if ck.Note != "" {
-		// 	msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
-		// }
+		if runtime.GOOS != "darwin" {
+			msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
+		}
 		msgs = append(msgs, []string{
 			"提醒：该账号已过期，请重新登录",
 		}...)
@@ -1036,8 +1040,13 @@ func (ck *JdCookie) Available() bool {
 			return false
 		}
 	case "0":
-		if url.QueryEscape(ui.Data.UserInfo.BaseInfo.CurPin) != ck.PtPin {
-			return av2(cookie)
+		realPin := url.QueryEscape(ui.Data.UserInfo.BaseInfo.CurPin)
+		if realPin != ck.PtPin {
+			if realPin == "" {
+				return av2(cookie)
+			} else {
+				ck.PtPin = realPin
+			}
 		}
 		if ui.Data.UserInfo.BaseInfo.Nickname != ck.Nickname || ui.Data.AssetInfo.BeanNum != ck.BeanNum || ui.Data.UserInfo.BaseInfo.UserLevel != ck.UserLevel || ui.Data.UserInfo.BaseInfo.LevelName != ck.LevelName {
 			ck.UserLevel = ui.Data.UserInfo.BaseInfo.UserLevel
