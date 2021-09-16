@@ -68,6 +68,35 @@ func init() {
 			},
 		},
 		{
+			Rules: []string{`raw ^资产推送$`},
+			Cron:  "1 18 * * *",
+			Handle: func(_ im.Sender) interface{} {
+				envs, _ := qinglong.GetEnvs("JD_COOKIE")
+				for _, env := range envs {
+					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
+					pt_key := core.FetchCookieValue(env.Value, "pt_key")
+					pinQQ.Foreach(func(k, v []byte) error {
+						if string(k) == pt_pin {
+							core.Push("qq", core.Int(string(v)), (&JdCookie{
+								PtKey: pt_key,
+								PtPin: pt_pin,
+							}).QueryAsset())
+						}
+						return nil
+					})
+					pinTG.Foreach(func(k, v []byte) error {
+						core.Push("tg", core.Int(string(v)), (&JdCookie{
+							PtKey: pt_key,
+							PtPin: pt_pin,
+						}).QueryAsset())
+						return nil
+					})
+				}
+
+				return "推送完成"
+			},
+		},
+		{
 			Rules: []string{`raw ^查询$`},
 			Handle: func(s im.Sender) interface{} {
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
