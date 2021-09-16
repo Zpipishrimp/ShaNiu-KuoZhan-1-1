@@ -34,6 +34,13 @@ var ua = `Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_2 like Mac OS X; en-us) Appl
 func init() {
 	core.AddCommand("jd", []core.Function{
 		{
+			Rules: []string{`update`},
+			Admin: true,
+			Handle: func(_ im.Sender) interface{} {
+				return nil
+			},
+		},
+		{
 			Rules: []string{`asset ?`, `raw ^查询 (\S+)$`},
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
