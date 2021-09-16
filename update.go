@@ -8,17 +8,11 @@ import (
 	"github.com/cdle/sillyGirl/im"
 )
 
-type JdCookie struct {
-	PtKey string
-	PtPin string
-}
-
 func init() {
 	core.AddCommand("", []core.Function{
 		{
-			Rules:   []string{`pt_key=([^;=\s]+);pt_pin=([^;=\s]+)`},
+			Rules:   []string{`raw pt_key=([^;=\s]+);pt_pin=([^;=\s]+)`},
 			Admin:   true,
-			Regex:   true,
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", s.Get(0), s.Get(1))
@@ -45,9 +39,8 @@ func init() {
 			},
 		},
 		{
-			Rules:   []string{`pin=([^;=\s]+);wskey=([^;=\s]+)`},
+			Rules:   []string{`raw pin=([^;=\s]+);wskey=([^;=\s]+)`},
 			Admin:   true,
-			Regex:   true,
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
