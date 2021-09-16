@@ -13,10 +13,6 @@ func init() {
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(name + "开始拉取代码。")
-				_, err := core.GitPull("")
-				if err != nil {
-					return err
-				}
 				need1, err := core.GitPull("")
 				if err != nil {
 					return err
@@ -28,7 +24,7 @@ func init() {
 				if !need1 && !need2 {
 					return name + "已是最新版。"
 				}
-				s.Reply(name + "开始拉取成功。")
+				s.Reply(name + "代码拉取成功。")
 				s.Reply(name + "正在编译程序。")
 				if err := core.CompileCode(); err != nil {
 					return err
