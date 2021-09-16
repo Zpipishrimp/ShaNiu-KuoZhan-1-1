@@ -18,6 +18,7 @@ func init() {
 			Rules:   []string{`raw pt_key=([^;=\s]+);\s*pt_pin=([^;=\s]+)`},
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
+				s.RecallGroupMessage()
 				ck := &JdCookie{
 					PtKey: s.Get(0),
 					PtPin: s.Get(1),
@@ -58,6 +59,7 @@ func init() {
 			Rules:   []string{`raw pin=([^;=\s]+);\s*wskey=([^;=\s]+)`},
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
+				s.RecallGroupMessage()
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
 				pt_key, err := getKey(value)
 				if err == nil {
