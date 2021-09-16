@@ -17,12 +17,15 @@ func init() {
 				if err != nil {
 					return err
 				}
-				core.GitPull("")
-				need, err := core.GitPull("/develop/jd_cookie")
+				need1, err := core.GitPull("")
 				if err != nil {
 					return err
 				}
-				if !need {
+				need2, err := core.GitPull("/develop/jd_cookie")
+				if err != nil {
+					return err
+				}
+				if !need1 && !need2 {
 					return name + "已是最新版。"
 				}
 				s.Reply(name + "开始拉取成功。")
