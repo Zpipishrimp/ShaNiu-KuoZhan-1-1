@@ -39,6 +39,7 @@ func init() {
 			Cron:  jdWSCK.Get("update", "55 * * * *"),
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
+				s.Disappear()
 				var cks = map[string]qinglong.Env{}
 				var wscks = map[string]qinglong.Env{}
 				envs, _ := qinglong.GetEnvs("")

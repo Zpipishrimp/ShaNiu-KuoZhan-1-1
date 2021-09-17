@@ -12,6 +12,7 @@ func init() {
 			Cron:  "41 * * * *",
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
+				s.Disappear()
 				s.Reply(name + "开始拉取代码。")
 				need1, err := core.GitPull("")
 				if err != nil {
