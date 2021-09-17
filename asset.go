@@ -69,7 +69,7 @@ func init() {
 		},
 		{
 			Rules: []string{`raw ^资产推送$`},
-			Cron:  "1 18 * * *",
+			Cron:  "40 21 * * *",
 			Admin: true,
 			Handle: func(_ im.Sender) interface{} {
 				envs, _ := qinglong.GetEnvs("JD_COOKIE")
