@@ -3,6 +3,7 @@ package jd_cookie
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
@@ -20,6 +21,7 @@ func init() {
 			Handle: func(s im.Sender) interface{} {
 				defer func() {
 					go func() {
+						time.Sleep(time.Second)
 						s.Reply(s.RecallGroupMessage())
 					}()
 				}()
