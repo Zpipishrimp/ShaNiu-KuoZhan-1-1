@@ -18,7 +18,11 @@ func init() {
 			Rules:   []string{`raw pt_key=([^;=\s]+);\s*pt_pin=([^;=\s]+)`},
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
-				s.Reply(s.RecallGroupMessage())
+				defer func() {
+					go func() {
+						s.Reply(s.RecallGroupMessage())
+					}()
+				}()
 				ck := &JdCookie{
 					PtKey: s.Get(0),
 					PtPin: s.Get(1),
