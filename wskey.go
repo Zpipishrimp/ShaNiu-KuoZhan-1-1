@@ -54,7 +54,6 @@ func init() {
 					if env.Status != 0 {
 						continue
 					}
-					delete(wscks, pin)
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
 					ck := &JdCookie{
 						PtPin: pin,
@@ -62,6 +61,7 @@ func init() {
 					}
 					if ck.Available() {
 						s.Reply(fmt.Sprintf("%s,JD_COOKIE有效。", ck.Nickname))
+						delete(wscks, pin)
 						continue
 					}
 					s.Reply(fmt.Sprintf("%s,JD_COOKIE已失效。", pin))
@@ -77,6 +77,7 @@ func init() {
 					pt_key, err := getKey(wse.Value)
 					if err != nil {
 						s.Reply(fmt.Sprintf("%s,JD_WSCK转换失败。%v", pin, err))
+						delete(wscks, pin)
 						continue
 					}
 					if strings.Contains(pt_key, "fake") {
@@ -86,6 +87,7 @@ func init() {
 						} else {
 							s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin))
 						}
+						delete(wscks, pin)
 						continue
 					}
 					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin))
@@ -96,6 +98,7 @@ func init() {
 					} else {
 						s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin))
 					}
+					delete(wscks, pin)
 				}
 				for pin, wse := range wscks {
 					pt_key, err := getKey(wse.Value)
