@@ -48,8 +48,12 @@ func init() {
 				} else {
 					env := envs[0]
 					env.Value = value
+					if env.Status != 0 {
+						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+							return err
+						}
+					}
 					env.Status = 0
-					fmt.Println(env)
 					if err := qinglong.UdpEnv(env); err != nil {
 						return err
 					}
@@ -118,6 +122,12 @@ func init() {
 				} else {
 					env := envs[0]
 					env.Value = value
+					if env.Status != 0 {
+						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+							return err
+						}
+					}
+					env.Status = 0
 					if err := qinglong.UdpEnv(env); err != nil {
 						return err
 					}
