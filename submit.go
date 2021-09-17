@@ -3,7 +3,6 @@ package jd_cookie
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
@@ -19,12 +18,7 @@ func init() {
 			Rules:   []string{`raw pt_key=([^;=\s]+);\s*pt_pin=([^;=\s]+)`},
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
-				defer func() {
-					go func() {
-						time.Sleep(time.Second)
-						s.Reply(s.RecallGroupMessage())
-					}()
-				}()
+				s.Reply(s.RecallGroupMessage())
 				ck := &JdCookie{
 					PtKey: s.Get(0),
 					PtPin: s.Get(1),
