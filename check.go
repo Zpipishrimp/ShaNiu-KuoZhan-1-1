@@ -91,12 +91,17 @@ func init() {
 						continue
 					}
 					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin))
-					env.Status = 0
-					env.Value = fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pin)
-					if err := qinglong.UdpEnv(env); err != nil {
+					if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
 						s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err))
 					} else {
 						s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin))
+					}
+					env.Status = 0
+					env.Value = fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pin)
+					if err := qinglong.UdpEnv(env); err != nil {
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err))
+					} else {
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin))
 					}
 					delete(wscks, pin)
 				}
