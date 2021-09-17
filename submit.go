@@ -48,6 +48,7 @@ func init() {
 				} else {
 					env := envs[0]
 					env.Value = value
+					fmt.Println(env)
 					if err := qinglong.UdpEnv(env); err != nil {
 						return err
 					}
