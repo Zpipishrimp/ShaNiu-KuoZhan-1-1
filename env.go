@@ -62,7 +62,7 @@ func init() {
 						fmt.Sprintf("编号：%v", ck.ID),
 						fmt.Sprintf("备注：%v", ck.Remarks),
 						fmt.Sprintf("状态：%v", status),
-						fmt.Sprintf("值：%v", ck.Value),
+						fmt.Sprintf("pin值：%v", core.FetchCookieValue(ck.Value, "pt_pin")),
 					}, "\n"))
 				}
 				return strings.Join(msg, "\n\n")
