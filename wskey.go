@@ -119,16 +119,18 @@ func init() {
 					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pin)
 					if env, ok := cks[pin]; ok {
 						env.Value = value
-						if err := qinglong.UdpEnv(env); err != nil {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err))
-						} else {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin))
-						}
 						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
 							s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err))
 						} else {
 							s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin))
 						}
+						env.Status = 0
+						if err := qinglong.UdpEnv(env); err != nil {
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err))
+						} else {
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin))
+						}
+
 					} else {
 						if err := qinglong.AddEnv(qinglong.Env{
 							Name:  "JD_COOKIE",
