@@ -108,11 +108,11 @@ func init() {
 					}
 					if strings.Contains(pt_key, "fake") {
 						s.Reply(fmt.Sprintf("%s,JD_WSCK已失效。", pin))
-						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+wse.ID+`"]`)); err != nil {
-							s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err))
-						} else {
-							s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin))
-						}
+						// if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+wse.ID+`"]`)); err != nil {
+						// 	s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err))
+						// } else {
+						// 	s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin))
+						// }
 						continue
 					}
 					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin))
