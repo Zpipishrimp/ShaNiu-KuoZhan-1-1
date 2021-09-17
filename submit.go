@@ -19,6 +19,7 @@ func init() {
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(s.Delete())
+				s.Disappear()
 				ck := &JdCookie{
 					PtKey: s.Get(0),
 					PtPin: s.Get(1),
@@ -66,6 +67,7 @@ func init() {
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(s.Delete())
+				s.Disappear()
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
 				pt_key, err := getKey(value)
 				if err == nil {
