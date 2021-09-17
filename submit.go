@@ -85,10 +85,10 @@ func init() {
 					return err
 				}
 				if s.GetImType() == "qq" {
-					pinQQ.Set(s.Get(1), s.GetUserID())
+					pinQQ.Set(ck.PtPin, s.GetUserID())
 				}
 				if s.GetImType() == "tg" {
-					pinTG.Set(s.Get(1), s.GetUserID())
+					pinTG.Set(ck.PtPin, s.GetUserID())
 				}
 				var envCK *qinglong.Env
 				var envWsCK *qinglong.Env
