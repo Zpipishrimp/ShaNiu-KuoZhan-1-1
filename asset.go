@@ -43,7 +43,7 @@ var getAsset = func(ck *JdCookie) string {
 		PtKey: ck.PtKey,
 		PtPin: ck.PtPin,
 	}).QueryAsset()
-	assets.Store(ck.PtKey, asset)
+	assets.Store(ck.PtPin, asset)
 	return asset
 }
 
