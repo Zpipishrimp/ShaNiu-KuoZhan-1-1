@@ -35,7 +35,7 @@ var assets sync.Map
 var queryAssetLocker sync.Mutex
 var getAsset = func(ck *JdCookie) string {
 	if asset, ok := assets.Load(ck.PtPin); ok {
-		return asset.(string)
+		return asset.(string) + "\n(来自缓存，10分钟后更新。)"
 	}
 	queryAssetLocker.Lock()
 	defer queryAssetLocker.Unlock()
