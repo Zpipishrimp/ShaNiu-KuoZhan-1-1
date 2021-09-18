@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/beego/beego/v2/client/httplib"
@@ -30,13 +31,40 @@ type JdCookie struct {
 
 var ua = `Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_2 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8H7 Safari/6533.18.5 UCBrowser/13.4.2.1122`
 
+var assets sync.Map
+var queryAssetLocker sync.Mutex
+var getAsset = func(ck *JdCookie) string {
+	if asset, ok := assets.Load(ck.PtPin); ok {
+		return asset.(string)
+	}
+	queryAssetLocker.Lock()
+	defer queryAssetLocker.Lock()
+	var asset = (&JdCookie{
+		PtKey: ck.PtKey,
+		PtPin: ck.PtPin,
+	}).QueryAsset()
+	assets.Store(ck.PtKey, asset)
+	return asset
+}
+
 func init() {
+	go func() {
+		for {
+			time.Sleep(time.Minute * 10)
+			assets.Range(func(key, _ interface{}) bool {
+				assets.Delete(key)
+				return true
+			})
+		}
+	}()
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{`asset ?`, `raw ^查询 (\S+)$`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				s.Disappear(time.Second * 40)
+				if s.GetImType() == "tg" {
+					s.Disappear(time.Second * 40)
+				}
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -62,7 +90,7 @@ func init() {
 					return "没有匹配的京东账号。"
 				}
 				for _, ck := range cks {
-					go s.Reply(ck.QueryAsset())
+					go s.Reply(getAsset(&ck))
 				}
 				return nil
 			},
@@ -73,31 +101,25 @@ func init() {
 			Admin: true,
 			Handle: func(_ core.Sender) interface{} {
 				envs, _ := qinglong.GetEnvs("JD_COOKIE")
-				assets := map[string]string{}
-				getAsset := func(pt_pin, pt_key string) string {
-					time.Sleep(time.Second)
-					if asset, ok := assets[pt_pin]; ok {
-						return asset
-					}
-					asset := (&JdCookie{
-						PtKey: pt_key,
-						PtPin: pt_pin,
-					}).QueryAsset()
-					assets[pt_pin] = asset
-					return asset
-				}
+
 				for _, env := range envs {
 					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
 					pinQQ.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && pt_pin != "" {
-							core.Push("qq", core.Int(string(v)), getAsset(pt_pin, pt_key))
+							core.Push("qq", core.Int(string(v)), getAsset(&JdCookie{
+								PtPin: pt_pin,
+								PtKey: pt_key,
+							}))
 						}
 						return nil
 					})
 					pinTG.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && pt_pin != "" {
-							core.Push("tg", core.Int(string(v)), getAsset(pt_pin, pt_key))
+							core.Push("tg", core.Int(string(v)), getAsset(&JdCookie{
+								PtPin: pt_pin,
+								PtKey: pt_key,
+							}))
 						}
 						return nil
 					})
@@ -148,7 +170,7 @@ func init() {
 					return "你尚未绑定🐶东账号，请私聊我你的账号信息。"
 				}
 				for _, ck := range cks {
-					go s.Reply(ck.QueryAsset())
+					go s.Reply(getAsset(&ck))
 				}
 				return nil
 			},
