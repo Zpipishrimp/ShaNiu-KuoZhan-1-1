@@ -16,7 +16,7 @@ var pinTG = core.NewBucket("pinTG")
 func init() {
 	core.AddCommand("jd", []core.Function{
 		{
-			Rules: []string{`stop ?`},
+			Rules: []string{`unbind ?`},
 			Handle: func(s im.Sender) interface{} {
 				s.Disappear(time.Second * 40)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
@@ -30,10 +30,7 @@ func init() {
 					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
 					pinQQ.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == s.Get() {
-							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+env.ID+`"]`)); err != nil {
-								return err
-							}
-							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+							s.Reply(fmt.Sprintf("已解绑，%s。", pt_pin))
 							defer func() {
 								pinQQ.Set(string(k), "")
 							}()
@@ -42,12 +39,9 @@ func init() {
 					})
 					pinTG.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == s.Get() {
-							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+env.ID+`"]`)); err != nil {
-								return err
-							}
-							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+							s.Reply(fmt.Sprintf("已解绑，%s。", pt_pin))
 							defer func() {
-								pinTG.Set(string(k), "") ///
+								pinTG.Set(string(k), "")
 							}()
 						}
 						return nil
