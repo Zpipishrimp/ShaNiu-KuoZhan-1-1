@@ -14,7 +14,42 @@ var pinQQ = core.NewBucket("pinQQ")
 var pinTG = core.NewBucket("pinTG")
 
 func init() {
-	core.AddCommand("", []core.Function{
+	core.AddCommand("jd", []core.Function{
+		{
+			Rules: []string{`stop ?`},
+			Handle: func(s im.Sender) interface{} {
+				s.Disappear(time.Second * 40)
+				envs, err := qinglong.GetEnvs("JD_COOKIE")
+				if err != nil {
+					return err
+				}
+				if len(envs) == 0 {
+					return "暂时无法操作。"
+				}
+				for _, env := range envs {
+					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
+					pinQQ.Foreach(func(k, v []byte) error {
+						if string(k) == pt_pin && string(v) == s.Get() {
+							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+env.ID+`"]`)); err != nil {
+								return err
+							}
+							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+						}
+						return nil
+					})
+					pinTG.Foreach(func(k, v []byte) error {
+						if string(k) == pt_pin && string(v) == s.Get() {
+							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+env.ID+`"]`)); err != nil {
+								return err
+							}
+							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+						}
+						return nil
+					})
+				}
+				return "操作完成"
+			},
+		},
 		{
 			Rules:   []string{`raw pt_key=([^;=\s]+);\s*pt_pin=([^;=\s]+)`},
 			FindAll: true,
