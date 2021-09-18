@@ -47,7 +47,7 @@ func init() {
 							}
 							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
 							defer func() {
-								pinTG.Set(string(k), "") //
+								pinTG.Set(string(k), "")
 							}()
 						}
 						return nil
