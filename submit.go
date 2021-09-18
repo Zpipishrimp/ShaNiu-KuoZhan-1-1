@@ -3,6 +3,7 @@ package jd_cookie
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
@@ -19,7 +20,7 @@ func init() {
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(s.Delete())
-				s.Disappear()
+				s.Disappear(time.Second * 20)
 				ck := &JdCookie{
 					PtKey: s.Get(0),
 					PtPin: s.Get(1),
@@ -67,7 +68,7 @@ func init() {
 			FindAll: true,
 			Handle: func(s im.Sender) interface{} {
 				s.Reply(s.Delete())
-				s.Disappear()
+				s.Disappear(time.Second * 20)
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
 				pt_key, err := getKey(value)
 				if err == nil {

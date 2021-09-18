@@ -37,6 +37,7 @@ func init() {
 			Rules: []string{`asset ?`, `raw ^查询 (\S+)$`},
 			Admin: true,
 			Handle: func(s im.Sender) interface{} {
+				s.Disappear(time.Second * 40)
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -102,13 +103,13 @@ func init() {
 						return nil
 					})
 				}
-
 				return "推送完成"
 			},
 		},
 		{
 			Rules: []string{`raw ^查询$`},
 			Handle: func(s im.Sender) interface{} {
+				s.Disappear(time.Second * 40)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
 					return err
