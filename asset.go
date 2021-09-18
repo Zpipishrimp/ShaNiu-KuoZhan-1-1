@@ -38,7 +38,7 @@ var getAsset = func(ck *JdCookie) string {
 		return asset.(string)
 	}
 	queryAssetLocker.Lock()
-	defer queryAssetLocker.Lock()
+	defer queryAssetLocker.Unlock()
 	var asset = (&JdCookie{
 		PtKey: ck.PtKey,
 		PtPin: ck.PtPin,
