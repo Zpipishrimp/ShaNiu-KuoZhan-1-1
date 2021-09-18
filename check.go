@@ -60,15 +60,15 @@ func init() {
 						PtKey: pt_key,
 					}
 					if ck.Available() {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE有效。", ck.Nickname))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE有效。", ck.Nickname), core.E)
 						delete(wscks, pin)
 						continue
 					}
-					s.Reply(fmt.Sprintf("%s,JD_COOKIE已失效。", pin))
+					s.Reply(fmt.Sprintf("%s,JD_COOKIE已失效。", pin), core.E)
 					if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+env.ID+`"]`)); err != nil {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE禁用失败。%v", pin, err))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE禁用失败。%v", pin, err), core.E)
 					} else {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE已禁用。", pin))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE已禁用。", pin), core.E)
 					}
 					wse, ok := wscks[pin]
 					if !ok {
@@ -76,68 +76,68 @@ func init() {
 					}
 					pt_key, err := getKey(wse.Value)
 					if err != nil {
-						s.Reply(fmt.Sprintf("%s,JD_WSCK转换失败。%v", pin, err))
+						s.Reply(fmt.Sprintf("%s,JD_WSCK转换失败。%v", pin, err), core.E)
 						delete(wscks, pin)
 						continue
 					}
 					if strings.Contains(pt_key, "fake") {
-						s.Reply(fmt.Sprintf("%s,JD_WSCK已失效。", pin))
+						s.Reply(fmt.Sprintf("%s,JD_WSCK已失效。", pin), core.E)
 						if jdWSCK.Get("autoDisableWsck", "true") == "true" {
 							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+wse.ID+`"]`)); err != nil {
-								s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err))
+								s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err), core.E)
 							} else {
-								s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin))
+								s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin), core.E)
 							}
 						}
 						delete(wscks, pin)
 						continue
 					}
-					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin))
+					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin), core.E)
 					if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err), core.E)
 					} else {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin), core.E)
 					}
 					env.Status = 0
 					env.Value = fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pin)
 					if err := qinglong.UdpEnv(env); err != nil {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err), core.E)
 					} else {
-						s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin))
+						s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin), core.E)
 					}
 					delete(wscks, pin)
 				}
 				for pin, wse := range wscks {
 					pt_key, err := getKey(wse.Value)
 					if err != nil {
-						s.Reply(fmt.Sprintf("%s,JD_WSCK转换失败。%v", pin, err))
+						s.Reply(fmt.Sprintf("%s,JD_WSCK转换失败。%v", pin, err), core.E)
 						continue
 					}
 					if strings.Contains(pt_key, "fake") {
 						s.Reply(fmt.Sprintf("%s,JD_WSCK已失效。", pin))
 						if jdWSCK.Get("autoDisableWsck", "true") == "true" {
 							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+wse.ID+`"]`)); err != nil {
-								s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err))
+								s.Reply(fmt.Sprintf("%s,JD_WSCK禁用失败。%v", pin, err), core.E)
 							} else {
-								s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin))
+								s.Reply(fmt.Sprintf("%s,JD_WSCK已禁用。", pin), core.E)
 							}
 						}
 						continue
 					}
-					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin))
+					s.Reply(fmt.Sprintf("%s,JD_WSCK转换JD_COOKIE成功。", pin), core.E)
 					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pin)
 					if env, ok := cks[pin]; ok {
 						env.Value = value
 						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE启用失败。%v", pin, err), core.E)
 						} else {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE已启用。", pin), core.E)
 						}
 						env.Status = 0
 						if err := qinglong.UdpEnv(env); err != nil {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE更新失败。%v", pin, err), core.E)
 						} else {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE已更新。", pin), core.E)
 						}
 
 					} else {
@@ -145,12 +145,13 @@ func init() {
 							Name:  "JD_COOKIE",
 							Value: value,
 						}); err != nil {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE添加失败。%v", pin, err))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE添加失败。%v", pin, err), core.E)
 						} else {
-							s.Reply(fmt.Sprintf("%s,JD_COOKIE已添加。", pin))
+							s.Reply(fmt.Sprintf("%s,JD_COOKIE已添加。", pin), core.E)
 						}
 					}
 				}
+				s.Reply("账号检查完成", core.E)
 				return nil
 			},
 		},
