@@ -12,7 +12,6 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
-	"github.com/cdle/sillyGirl/im"
 )
 
 var jdWSCK = core.NewBucket("jdWSCK")
@@ -38,7 +37,7 @@ func init() {
 			Rules: []string{`raw ^更新狗东账号`},
 			Cron:  jdWSCK.Get("update", "55 * * * *"),
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Disappear()
 				var cks = map[string]qinglong.Env{}
 				var wscks = map[string]qinglong.Env{}

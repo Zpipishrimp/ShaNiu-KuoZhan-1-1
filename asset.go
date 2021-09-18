@@ -14,7 +14,6 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
-	"github.com/cdle/sillyGirl/im"
 )
 
 type JdCookie struct {
@@ -36,7 +35,7 @@ func init() {
 		{
 			Rules: []string{`asset ?`, `raw ^查询 (\S+)$`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Disappear(time.Second * 40)
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
@@ -72,7 +71,7 @@ func init() {
 			Rules: []string{`raw ^资产推送$`},
 			Cron:  "40 21 * * *",
 			Admin: true,
-			Handle: func(_ im.Sender) interface{} {
+			Handle: func(_ core.Sender) interface{} {
 				envs, _ := qinglong.GetEnvs("JD_COOKIE")
 				assets := map[string]string{}
 				getAsset := func(pt_pin, pt_key string) string {
@@ -108,7 +107,7 @@ func init() {
 		},
 		{
 			Rules: []string{`raw ^查询$`},
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Disappear(time.Second * 40)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -154,7 +153,7 @@ func init() {
 		{
 			Rules: []string{`today bean(?)`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -195,7 +194,7 @@ func init() {
 		{
 			Rules: []string{`yestoday bean(?)`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -236,7 +235,7 @@ func init() {
 		{
 			Rules: []string{`bean(?)`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {

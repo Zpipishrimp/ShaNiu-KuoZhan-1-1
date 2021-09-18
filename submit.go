@@ -7,7 +7,6 @@ import (
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
-	"github.com/cdle/sillyGirl/im"
 )
 
 var pinQQ = core.NewBucket("pinQQ")
@@ -17,7 +16,7 @@ func init() {
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{`unbind ?`},
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Disappear(time.Second * 40)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -53,7 +52,7 @@ func init() {
 		{
 			Rules:   []string{`raw pt_key=([^;=\s]+);\s*pt_pin=([^;=\s]+)`},
 			FindAll: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Reply(s.Delete())
 				s.Disappear(time.Second * 20)
 				ck := &JdCookie{
@@ -101,7 +100,7 @@ func init() {
 		{
 			Rules:   []string{`raw pin=([^;=\s]+);\s*wskey=([^;=\s]+)`},
 			FindAll: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Reply(s.Delete())
 				s.Disappear(time.Second * 20)
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))

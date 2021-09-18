@@ -2,7 +2,6 @@ package jd_cookie
 
 import (
 	"github.com/cdle/sillyGirl/core"
-	"github.com/cdle/sillyGirl/im"
 )
 
 func init() {
@@ -11,7 +10,7 @@ func init() {
 			Rules: []string{"raw ^jd update$"},
 			Cron:  "41 * * * *",
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				s.Disappear()
 				s.Reply(name + "开始拉取代码。")
 				need1, err := core.GitPull("")

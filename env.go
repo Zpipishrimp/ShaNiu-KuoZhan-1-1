@@ -7,7 +7,6 @@ import (
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
-	"github.com/cdle/sillyGirl/im"
 )
 
 func init() {
@@ -15,7 +14,7 @@ func init() {
 		{
 			Rules: []string{`find ?`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				a := s.Get()
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
@@ -71,7 +70,7 @@ func init() {
 		{
 			Rules: []string{`exchange ? ?`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				ac1 := s.Get(0)
 				ac2 := s.Get(1)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
@@ -103,7 +102,7 @@ func init() {
 		{
 			Rules: []string{`enable ?`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+s.Get()+`"]`)); err != nil {
 					return err
 				}
@@ -113,7 +112,7 @@ func init() {
 		{
 			Rules: []string{`disable ?`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/disable", []byte(`["`+s.Get()+`"]`)); err != nil {
 					return err
 				}
@@ -123,7 +122,7 @@ func init() {
 		{
 			Rules: []string{`remark ? ?`},
 			Admin: true,
-			Handle: func(s im.Sender) interface{} {
+			Handle: func(s core.Sender) interface{} {
 				env, err := qinglong.GetEnv(s.Get())
 				if err != nil {
 					return err
