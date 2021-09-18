@@ -14,7 +14,7 @@ var pinQQ = core.NewBucket("pinQQ")
 var pinTG = core.NewBucket("pinTG")
 
 func init() {
-	core.AddCommand("jd", []core.Function{
+	core.AddCommand("jd", []core.Function{ //
 		{
 			Rules: []string{`unbind ?`},
 			Handle: func(s im.Sender) interface{} {
