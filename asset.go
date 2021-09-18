@@ -119,6 +119,9 @@ func init() {
 				cks := []JdCookie{}
 				for _, env := range envs {
 					pt_key := FetchJdCookieValue("pt_key", env.Value)
+					if env.Status != 0 {
+						pt_key = ""
+					}
 					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
 					pinQQ.Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
@@ -1053,6 +1056,9 @@ func jdzz(cookie string, state chan int64) { //
 }
 
 func (ck *JdCookie) Available() bool {
+	if ck.PtKey == "" {
+		return false
+	}
 	cookie := "pt_key=" + ck.PtKey + ";pt_pin=" + ck.PtPin + ";"
 	if ck == nil {
 		return true
