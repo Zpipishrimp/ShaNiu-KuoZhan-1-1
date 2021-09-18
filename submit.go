@@ -34,6 +34,9 @@ func init() {
 								return err
 							}
 							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+							defer func() {
+								pinQQ.Set(string(k), "")
+							}()
 						}
 						return nil
 					})
@@ -43,6 +46,9 @@ func init() {
 								return err
 							}
 							s.Reply(fmt.Sprintf("已停止，%s。", pt_pin))
+							defer func() {
+								pinQQ.Set(string(k), "")
+							}()
 						}
 						return nil
 					})
