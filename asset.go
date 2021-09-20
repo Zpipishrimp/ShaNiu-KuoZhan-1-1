@@ -104,24 +104,21 @@ func init() {
 				for _, env := range envs {
 					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
-					pinQQ.Foreach(func(k, v []byte) error {
-						if string(k) == pt_pin && pt_pin != "" {
-							core.Push("qq", core.Int(string(v)), getAsset(&JdCookie{
-								PtPin: pt_pin,
-								PtKey: pt_key,
-							}))
-						}
-						return nil
-					})
-					pinTG.Foreach(func(k, v []byte) error {
-						if string(k) == pt_pin && pt_pin != "" {
-							core.Push("tg", core.Int(string(v)), getAsset(&JdCookie{
-								PtPin: pt_pin,
-								PtKey: pt_key,
-							}))
-						}
-						return nil
-					})
+
+					for _, pin := range []core.Bucket{
+						pinQQ, pinTG, pinWXMP,
+					} {
+						pin.Foreach(func(k, v []byte) error {
+							if string(k) == pt_pin && pt_pin != "" {
+								core.Push("tg", core.Int(string(v)), getAsset(&JdCookie{
+									PtPin: pt_pin,
+									PtKey: pt_key,
+								}))
+							}
+							return nil
+						})
+					}
+
 				}
 				return "推送完成"
 			},
@@ -144,7 +141,7 @@ func init() {
 						pt_key = ""
 					}
 					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
-					core.Bucket("pin" + strings.ToUpper(s.GetImType())).Foreach(func(k, v []byte) error {
+					pin(s.GetImType()).Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
 							cks = append(cks, JdCookie{
 								PtKey: pt_key,
