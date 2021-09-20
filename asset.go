@@ -101,7 +101,6 @@ func init() {
 			Admin: true,
 			Handle: func(_ core.Sender) interface{} {
 				envs, _ := qinglong.GetEnvs("JD_COOKIE")
-
 				for _, env := range envs {
 					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
