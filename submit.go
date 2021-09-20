@@ -58,7 +58,6 @@ func init() {
 				if err != nil {
 					return err
 				}
-
 				core.Bucket(s.GetImType()).Set(ck.PtPin, s.GetUserID())
 				if len(envs) == 0 {
 					if err := qinglong.AddEnv(qinglong.Env{
@@ -112,12 +111,7 @@ func init() {
 				if err != nil {
 					return err
 				}
-				if s.GetImType() == "qq" {
-					pinQQ.Set(ck.PtPin, s.GetUserID())
-				}
-				if s.GetImType() == "tg" {
-					pinTG.Set(ck.PtPin, s.GetUserID())
-				}
+				core.Bucket(s.GetImType()).Set(ck.PtPin, s.GetUserID())
 				var envCK *qinglong.Env
 				var envWsCK *qinglong.Env
 				for i := range envs {

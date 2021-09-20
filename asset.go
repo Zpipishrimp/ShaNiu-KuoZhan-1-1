@@ -145,17 +145,7 @@ func init() {
 						pt_key = ""
 					}
 					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
-					pinQQ.Foreach(func(k, v []byte) error {
-						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
-							cks = append(cks, JdCookie{
-								PtKey: pt_key,
-								PtPin: pt_pin,
-								Note:  env.Remarks,
-							})
-						}
-						return nil
-					})
-					pinTG.Foreach(func(k, v []byte) error {
+					core.Bucket(s.GetImType()).Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == fmt.Sprint(s.GetUserID()) {
 							cks = append(cks, JdCookie{
 								PtKey: pt_key,
