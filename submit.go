@@ -80,7 +80,9 @@ func init() {
 					}); err != nil {
 						return err
 					}
-					return ck.Nickname + ",添加成功。"
+					rt := ck.Nickname + ",添加成功。"
+					core.NotifyMasters(rt)
+					return rt
 				} else {
 					env := envs[0]
 					env.Value = value
@@ -93,7 +95,9 @@ func init() {
 					if err := qinglong.UdpEnv(env); err != nil {
 						return err
 					}
-					return ck.Nickname + ",更新成功。"
+					rt := ck.Nickname + ",更新成功。"
+					core.NotifyMasters(rt)
+					return rt
 				}
 			},
 		},
