@@ -90,7 +90,7 @@ func init() {
 					return "没有匹配的京东账号。"
 				}
 				for _, ck := range cks {
-					go s.Reply(getAsset(&ck))
+					s.Reply(getAsset(&ck))
 				}
 				return nil
 			},
@@ -160,7 +160,7 @@ func init() {
 					return "你尚未绑定🐶东账号，请私聊我你的账号信息。"
 				}
 				for _, ck := range cks {
-					go s.Reply(getAsset(&ck))
+					s.Reply(getAsset(&ck))
 				}
 				return nil
 			},
