@@ -27,7 +27,7 @@ func init() {
 				}
 				for _, env := range envs {
 					pt_pin := FetchJdCookieValue("pt_pin", env.Value)
-					core.Bucket(s.GetImType()).Foreach(func(k, v []byte) error {
+					core.Bucket(s.GetImType() + "Pin").Foreach(func(k, v []byte) error {
 						if string(k) == pt_pin && string(v) == s.Get() {
 							s.Reply(fmt.Sprintf("已解绑，%s。", pt_pin))
 							defer func() {
@@ -58,7 +58,7 @@ func init() {
 				if err != nil {
 					return err
 				}
-				core.Bucket(s.GetImType()).Set(ck.PtPin, s.GetUserID())
+				core.Bucket(s.GetImType()+"Pin").Set(ck.PtPin, s.GetUserID())
 				if len(envs) == 0 {
 					if err := qinglong.AddEnv(qinglong.Env{
 						Name:  "JD_COOKIE",
@@ -111,7 +111,7 @@ func init() {
 				if err != nil {
 					return err
 				}
-				core.Bucket(s.GetImType()).Set(ck.PtPin, s.GetUserID())
+				core.Bucket(s.GetImType()+"Pin").Set(ck.PtPin, s.GetUserID())
 				var envCK *qinglong.Env
 				var envWsCK *qinglong.Env
 				for i := range envs {
