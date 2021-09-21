@@ -7,6 +7,7 @@ import (
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/gin-gonic/gin"
 )
 
 var pinQQ = core.NewBucket("pinQQ")
@@ -17,6 +18,84 @@ var pin = func(class string) core.Bucket {
 }
 
 func init() {
+	core.Server.GET("/cookie", func(c *gin.Context) {
+		cookie := c.GetString("ck")
+		ck := &JdCookie{
+			PtKey: core.FetchCookieValue(cookie, "pt_key"),
+			PtPin: core.FetchCookieValue(cookie, "pt_pin"),
+		}
+		type Result struct {
+			Code    int         `json:"code"`
+			Data    interface{} `json:"data"`
+			Message string      `json:"message"`
+		}
+		result := Result{
+			Data: nil,
+			Code: 300,
+		}
+		if ck.PtPin == "" || ck.PtKey == "" {
+			result.Message = "一句mmp，不知当讲不当讲。"
+			c.JSON(200, result)
+		}
+		if !ck.Available() {
+			result.Message = "无效的ck，请重试。"
+			c.JSON(200, result)
+			return
+		}
+		value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
+		envs, err := qinglong.GetEnvs("JD_COOKIE")
+		if err != nil {
+			result.Message = err.Error()
+			c.JSON(200, result)
+			return
+		}
+		find := false
+		for _, env := range envs {
+			if strings.Contains(env.Value, fmt.Sprintf("pt_pin=%s;", ck.PtPin)) {
+				envs = []qinglong.Env{env}
+				find = true
+				break
+			}
+		}
+		if !find {
+			if err := qinglong.AddEnv(qinglong.Env{
+				Name:  "JD_COOKIE",
+				Value: value,
+			}); err != nil {
+				result.Message = err.Error()
+				c.JSON(200, result)
+				return
+			}
+			rt := ck.Nickname + ",添加成功。"
+			core.NotifyMasters(rt)
+			result.Message = rt
+			result.Code = 200
+			c.JSON(200, result)
+			return
+		} else {
+			env := envs[0]
+			env.Value = value
+			if env.Status != 0 {
+				if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+					result.Message = err.Error()
+					c.JSON(200, result)
+					return
+				}
+			}
+			env.Status = 0
+			if err := qinglong.UdpEnv(env); err != nil {
+				result.Message = err.Error()
+				c.JSON(200, result)
+				return
+			}
+			rt := ck.Nickname + ",更新成功。"
+			core.NotifyMasters(rt)
+			result.Message = rt
+			result.Code = 200
+			c.JSON(200, result)
+			return
+		}
+	})
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{`unbind ?`},
