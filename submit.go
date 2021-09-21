@@ -58,12 +58,20 @@ func init() {
 					return "无效的ck，请重试。"
 				}
 				value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
-				envs, err := qinglong.GetEnvs(fmt.Sprintf("pt_pin=%s;", ck.PtPin))
+				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
 					return err
 				}
+				find := false
+				for _, env := range envs {
+					if strings.Contains(env.Value, fmt.Sprintf("pt_pin=%s;", ck.PtPin)) {
+						envs = []qinglong.Env{env}
+						find = true
+						break
+					}
+				}
 				pin(s.GetImType()).Set(ck.PtPin, s.GetUserID())
-				if len(envs) == 0 {
+				if !find {
 					if err := qinglong.AddEnv(qinglong.Env{
 						Name:  "JD_COOKIE",
 						Value: value,
@@ -111,7 +119,7 @@ func init() {
 					PtPin: s.Get(0),
 				}
 				ck.Available()
-				envs, err := qinglong.GetEnvs(fmt.Sprintf("pin=%s;", ck.PtPin))
+				envs, err := qinglong.GetEnvs("pin=")
 				if err != nil {
 					return err
 				}
