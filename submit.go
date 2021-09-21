@@ -36,6 +36,7 @@ func init() {
 		if ck.PtPin == "" || ck.PtKey == "" {
 			result.Message = "一句mmp，不知当讲不当讲。"
 			c.JSON(200, result)
+			return
 		}
 		if !ck.Available() {
 			result.Message = "无效的ck，请重试。"
