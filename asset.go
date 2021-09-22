@@ -392,8 +392,8 @@ func (ck *JdCookie) QueryAsset() string {
 	}
 	asset := Asset{}
 	if ck.Available() {
-		msgs = append(msgs, fmt.Sprintf("用户等级：%v", ck.UserLevel))
-		msgs = append(msgs, fmt.Sprintf("等级名称：%v", ck.LevelName))
+		// msgs = append(msgs, fmt.Sprintf("用户等级：%v", ck.UserLevel))
+		// msgs = append(msgs, fmt.Sprintf("等级名称：%v", ck.LevelName))
 		cookie := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
 		var rpc = make(chan []RedList)
 		var fruit = make(chan string)
@@ -495,11 +495,11 @@ func (ck *JdCookie) QueryAsset() string {
 				fmt.Sprintf("所有红包：%.2f%s元🧧", asset.RedPacket.Total, e(asset.RedPacket.ToExpire)),
 				fmt.Sprintf("京喜红包：%.2f%s元", asset.RedPacket.Jx, e(asset.RedPacket.ToExpireJx)),
 				fmt.Sprintf("极速红包：%.2f%s元", asset.RedPacket.Js, e(asset.RedPacket.ToExpireJs)),
-				fmt.Sprintf("健康红包：%.2f%s元", asset.RedPacket.Jk, e(asset.RedPacket.ToExpireJk)),
+				// fmt.Sprintf("健康红包：%.2f%s元", asset.RedPacket.Jk, e(asset.RedPacket.ToExpireJk)),
 				fmt.Sprintf("京东红包：%.2f%s元", asset.RedPacket.Jd, e(asset.RedPacket.ToExpireJd)),
 			}...)
 		} else {
-			msgs = append(msgs, "暂无红包数据🧧")
+			// msgs = append(msgs, "暂无红包数据🧧")
 		}
 		msgs = append(msgs, fmt.Sprintf("东东农场：%s", <-fruit))
 		msgs = append(msgs, fmt.Sprintf("东东萌宠：%s", <-pet))
