@@ -157,6 +157,7 @@ func init() {
 				defer delete(codes, id)
 				var sess = new(Session)
 				phone := s.Get()
+				s.Reply("请稍后，正在模拟环境...")
 				if err := sess.Phone(phone); err != nil {
 					return err
 				}
