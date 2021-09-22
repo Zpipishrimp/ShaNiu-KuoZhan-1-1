@@ -58,7 +58,7 @@ func (sess *Session) control(name, value string) error {
 
 func (sess *Session) login(phone, sms_code string) error {
 	address := jd_cookie.Get("address")
-	req := httplib.Post(address + "/control")
+	req := httplib.Post(address + "/jdLogin")
 	req.Param("phone", phone)
 	req.Param("sms_code", sms_code)
 	req.Param("clientSessionId", sess.String())
@@ -166,9 +166,11 @@ func init() {
 						return errors.New("登录超时。")
 					}
 					if query.CanClickLogin && !login {
+						s.Reply("正在登录...")
 						if err := sess.login(phone, sms_code); err != nil {
 							return err
 						}
+						s.Reply("登录成功！")
 					}
 					if query.PageStatus == "VERIFY_FAILED_MAX" {
 						return errors.New("验证码错误次数过多，请重新获取。")
@@ -182,13 +184,15 @@ func init() {
 						if err := sess.crackCaptcha(); err != nil {
 							return err
 						}
+						s.Reply("验证通过。")
 						s.Reply("请输入验证码__")
-						//可以点击登录
 						select {
 						case sms_code = <-c:
+							s.Reply("正在提交验证码...")
 							if err := sess.SmsCode(sms_code); err != nil {
 								return err
 							}
+							s.Reply("验证码提交成功。")
 						case <-time.After(60 * time.Second):
 							return "验证码超时。"
 						}
