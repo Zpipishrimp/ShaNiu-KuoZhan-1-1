@@ -28,7 +28,9 @@ type Query struct {
 	AvailChrome       int    `json:"availChrome"`
 }
 
-type Session string
+type Session struct {
+	Value string
+}
 
 func (sess *Session) create() error {
 	var address = jd_cookie.Get("address")
@@ -40,10 +42,7 @@ func (sess *Session) create() error {
 	if len(res) == 0 {
 		return errors.New("其他用户正在使用，请稍后再试。")
 	}
-	var value = Session(res[1])
-
-	sess = &value
-	fmt.Println(*sess)
+	sess.Value = res[1]
 	return nil
 }
 
@@ -75,7 +74,7 @@ func (sess *Session) sendAuthCode() error {
 }
 
 func (sess *Session) String() string {
-	return string(*sess)
+	return sess.Value
 }
 
 func (sess *Session) query() (*Query, error) {
