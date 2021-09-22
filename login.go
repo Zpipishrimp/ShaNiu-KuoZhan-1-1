@@ -149,9 +149,6 @@ func init() {
 				}
 				for {
 					query, _ := sess.query()
-					if query.PageStatus == "NORMAL" {
-						continue
-					}
 					if query.PageStatus == "SESSION_EXPIRED" {
 						return errors.New("对不起，登录超时。")
 					}
