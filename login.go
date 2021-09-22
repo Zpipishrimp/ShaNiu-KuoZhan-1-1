@@ -68,7 +68,7 @@ func (sess *Session) login(phone, sms_code string) error {
 
 func (sess *Session) sendAuthCode() error {
 	address := jd_cookie.Get("address")
-	req := httplib.Get(address + "sendAuthCode?clientSessionId=" + sess.String())
+	req := httplib.Get(address + "/sendAuthCode?clientSessionId=" + sess.String())
 	_, err := req.Response()
 	return err
 }
