@@ -104,7 +104,7 @@ func init() {
 					for _, c := range cs {
 						rt = append(rt, <-c)
 					}
-					s.Reply(rt)
+					s.Reply(strings.Join(rt, "\n\n"))
 				} else {
 					for _, ck := range cks {
 						s.Reply(getAsset(&ck))
@@ -184,7 +184,7 @@ func init() {
 					for _, c := range cs {
 						rt = append(rt, <-c)
 					}
-					s.Reply(rt)
+					s.Reply(strings.Join(rt, "\n\n"))
 				} else {
 					for _, ck := range cks {
 						s.Reply(getAsset(&ck))
