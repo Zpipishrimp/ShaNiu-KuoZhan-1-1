@@ -190,7 +190,7 @@ func init() {
 
 					}
 					if query.AuthCodeCountDown == -1 && send {
-						return "验证码超时。"
+						// return "验证码超时。"
 					}
 					if query.PageStatus == "SUCCESS_CK" {
 						return fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
