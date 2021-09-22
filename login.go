@@ -189,7 +189,7 @@ func init() {
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
 					}
-					if query.AuthCodeCountDown == -1 {
+					if query.AuthCodeCountDown == -1 && send {
 						return "验证码超时。"
 					}
 					if query.PageStatus == "SUCCESS_CK" {
