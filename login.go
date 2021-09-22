@@ -81,6 +81,7 @@ func (sess *Session) String() string {
 func (sess *Session) query() (*Query, error) {
 	query := &Query{}
 	address := jd_cookie.Get("address")
+	fmt.Println(sess.String(), "+++")
 	data, err := httplib.Get(fmt.Sprintf("%s/getScreen?clientSessionId=%s", address, sess.String())).Bytes()
 	if err != nil {
 		return nil, err
@@ -142,7 +143,7 @@ func init() {
 				}
 				id := s.GetImType() + fmt.Sprint(s.GetUserID())
 				defer delete(codes, id)
-				var sess Session
+				var sess *Session
 				phone := s.Get()
 				if err := sess.Phone(phone); err != nil {
 					return err
