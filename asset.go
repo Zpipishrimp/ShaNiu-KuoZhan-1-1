@@ -123,12 +123,12 @@ func init() {
 					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
 
-					for _, pin := range []core.Bucket{
-						pinQQ, pinTG, pinWXMP,
+					for _, tp := range []string{
+						"qq", "tg", "wxmp",
 					} {
-						pin.Foreach(func(k, v []byte) error {
+						core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 							if string(k) == pt_pin && pt_pin != "" {
-								core.Push("tg", core.Int(string(v)), getAsset(&JdCookie{
+								core.Push(tp, core.Int(string(v)), getAsset(&JdCookie{
 									PtPin: pt_pin,
 									PtKey: pt_key,
 								}))
