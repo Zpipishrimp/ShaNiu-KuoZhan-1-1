@@ -40,7 +40,7 @@ func (sess *Session) create() error {
 	html, _ := httplib.Get(address).String()
 	res := regexp.MustCompile(`value="([\d\w]+)"`).FindStringSubmatch(html)
 	if len(res) == 0 {
-		return errors.New("其他用户正在使用，请稍后再试。")
+		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址：https://github.com/rubyangxg/jd-qinglong"))
 	}
 	sess.Value = res[1]
 	return nil
