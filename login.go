@@ -141,7 +141,6 @@ func init() {
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw ^(\d{11})$`},
-			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
