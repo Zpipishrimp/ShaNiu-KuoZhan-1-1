@@ -32,8 +32,15 @@ type Session struct {
 	Value string
 }
 
+func (sess *Session) address() string {
+	if v := regexp.MustCompile(`^(https?://[\.\w]+:?\d*)`).FindStringSubmatch(jd_cookie.Get("address")); len(v) == 2 {
+		return v[1]
+	}
+	return ""
+}
+
 func (sess *Session) create() error {
-	var address = jd_cookie.Get("address")
+	var address = sess.address()
 	var url = "https://github.com/rubyangxg/jd-qinglong"
 	if address == "" {
 		return errors.New("未配置服务器地址，仓库地址：" + url)
@@ -48,7 +55,7 @@ func (sess *Session) create() error {
 }
 
 func (sess *Session) control(name, value string) error {
-	address := jd_cookie.Get("address")
+	address := sess.address()
 	req := httplib.Post(address + "/control")
 	req.Param("currId", name)
 	req.Param("currValue", value)
@@ -59,7 +66,7 @@ func (sess *Session) control(name, value string) error {
 }
 
 func (sess *Session) login(phone, sms_code string) error {
-	address := jd_cookie.Get("address")
+	address := sess.address()
 	req := httplib.Post(address + "/jdLogin")
 	req.Param("phone", phone)
 	req.Param("sms_code", sms_code)
@@ -70,7 +77,7 @@ func (sess *Session) login(phone, sms_code string) error {
 }
 
 func (sess *Session) sendAuthCode() error {
-	address := jd_cookie.Get("address")
+	address := sess.address()
 	req := httplib.Get(address + "/sendAuthCode?clientSessionId=" + sess.String())
 	_, err := req.Response()
 	return err
@@ -82,7 +89,7 @@ func (sess *Session) String() string {
 
 func (sess *Session) query() (*Query, error) {
 	query := &Query{}
-	address := jd_cookie.Get("address")
+	address := sess.address()
 	// fmt.Println(sess.String(), "+++")
 	data, err := httplib.Get(fmt.Sprintf("%s/getScreen?clientSessionId=%s", address, sess.String())).Bytes()
 	if err != nil {
@@ -130,7 +137,7 @@ func (sess *Session) SmsCode(sms_code string) error {
 }
 
 func (sess *Session) crackCaptcha() error {
-	address := jd_cookie.Get("address")
+	address := sess.address()
 	_, err := httplib.Get(fmt.Sprintf("%s/crackCaptcha?clientSessionId=%s", address, sess.String())).Response()
 	return err
 }
