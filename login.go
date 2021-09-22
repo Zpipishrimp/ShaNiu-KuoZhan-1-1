@@ -166,7 +166,9 @@ func init() {
 						return errors.New("登录超时。")
 					}
 					if query.CanClickLogin && !login {
-						sess.login(phone, sms_code)
+						if err := sess.login(phone, sms_code); err != nil {
+							return err
+						}
 					}
 					if query.PageStatus == "VERIFY_FAILED_MAX" {
 						return errors.New("验证码错误次数过多，请重新获取。")
@@ -176,19 +178,25 @@ func init() {
 					}
 					if query.PageStatus == "REQUIRE_VERIFY" && !verify {
 						verify = true
-						sess.crackCaptcha()
 						s.Reply("正在自动验证...")
+						if err := sess.crackCaptcha(); err != nil {
+							return err
+						}
+						s.Reply("请输入验证码__")
 						//可以点击登录
 						select {
 						case sms_code = <-c:
-							sess.SmsCode(sms_code)
+							if err := sess.SmsCode(sms_code); err != nil {
+								return err
+							}
 						case <-time.After(60 * time.Second):
 							return "验证码超时。"
 						}
 					}
 					if query.CanSendAuth && !send {
-						sess.sendAuthCode()
-						s.Reply("请输入验证码__")
+						if err := sess.sendAuthCode(); err != nil {
+							return err
+						}
 						send = true
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
