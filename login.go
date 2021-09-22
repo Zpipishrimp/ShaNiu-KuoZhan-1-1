@@ -207,7 +207,7 @@ func init() {
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
-					return "你已在登录中."
+					return "你已在登录中。"
 				}
 				s.Reply("请输入手机号__")
 				return nil
