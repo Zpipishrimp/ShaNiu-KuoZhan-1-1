@@ -150,6 +150,7 @@ func init() {
 				send := false
 				login := false
 				verify := false
+				sms_code := ""
 				for {
 					query, _ := sess.query()
 					if query.PageStatus == "SESSION_EXPIRED" {
@@ -159,16 +160,7 @@ func init() {
 						return errors.New("登录超时。")
 					}
 					if query.CanClickLogin && !login {
-						//可以点击登录
-						c := make(chan string, 1)
-						codes[id] = c
-						select {
-						case sms_code := <-c:
-							s.Reply("正在登录...")
-							sess.login(phone, sms_code)
-						case <-time.After(60 * time.Second):
-							return "验证码超时。"
-						}
+						sess.login(phone, sms_code)
 					}
 					if query.PageStatus == "VERIFY_FAILED_MAX" {
 						return errors.New("验证码错误次数过多，请重新获取。")
@@ -180,11 +172,21 @@ func init() {
 						verify = true
 						sess.crackCaptcha()
 						s.Reply("正在自动验证...")
+
 					}
 					if query.CanSendAuth && !send {
 						sess.sendAuthCode()
 						s.Reply("请输入验证码__")
 						send = true
+						//可以点击登录
+						c := make(chan string, 1)
+						codes[id] = c
+						select {
+						case sms_code = <-c:
+							sess.SmsCode(sms_code)
+						case <-time.After(60 * time.Second):
+							return "验证码超时。"
+						}
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
