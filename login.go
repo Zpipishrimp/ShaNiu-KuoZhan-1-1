@@ -164,6 +164,7 @@ func init() {
 				send := false
 				login := false
 				verify := false
+				success := false
 				sms_code := ""
 				for {
 					query, _ := sess.query()
@@ -171,6 +172,9 @@ func init() {
 						return errors.New("登录超时。")
 					}
 					if query.SessionTimeOut == 0 {
+						if success {
+							return nil
+						}
 						return errors.New("登录超时。")
 					}
 					if query.CanClickLogin && !login {
@@ -214,16 +218,16 @@ func init() {
 
 					}
 					if query.AuthCodeCountDown == -1 && send {
-						// return "验证码超时。"
+
 					}
-					if query.PageStatus == "SUCCESS_CK" {
+					if query.PageStatus == "SUCCESS_CK" && !success {
 						core.Senders <- &core.Faker{
 							Message: fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin),
 							UserID:  s.GetUserID(),
 							Type:    s.GetImType(),
 						}
-						s.Reply("登录成功！")
-						return nil
+						s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录第二个账号。", query.SessionTimeOut))
+						success = true
 					}
 					time.Sleep(time.Second)
 				}
