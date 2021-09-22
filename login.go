@@ -143,9 +143,12 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
+				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
+					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
+				}
 				id := s.GetImType() + fmt.Sprint(s.GetUserID())
 				if _, ok := codes[id]; ok {
-					return "你已在登录中."
+					return "你已在登录中。"
 				}
 				c := make(chan string, 1)
 				codes[id] = c
@@ -225,9 +228,12 @@ func init() {
 		},
 		{
 			Rules: []string{`raw ^登录$`},
-			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
+					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
+				}
+				id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				if _, ok := codes[id]; ok {
 					return "你已在登录中。"
 				}
 				s.Reply("请输入手机号__")
@@ -236,12 +242,11 @@ func init() {
 		},
 		{
 			Rules: []string{`raw ^(\d{6})$`},
-			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
 				} else {
-					s.Reply("验证码已过期。")
+					s.Reply("验证码不存在。")
 				}
 				return nil
 			},
