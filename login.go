@@ -133,6 +133,8 @@ func init() {
 				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					return "你已在登录中."
 				}
+				id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				defer delete(codes, id)
 				var sess Session
 				phone := s.Get()
 				if err := sess.Phone(phone); err != nil {
@@ -152,8 +154,7 @@ func init() {
 					if query.CanClickLogin {
 						//可以点击登录
 						c := make(chan string, 1)
-						id := s.GetImType() + fmt.Sprint(s.GetUserID())
-						defer delete(codes, id)
+
 						codes[id] = c
 						select {
 						case sms_code := <-c:
