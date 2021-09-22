@@ -41,7 +41,9 @@ func (sess *Session) create() error {
 		return errors.New("其他用户正在使用，请稍后再试。")
 	}
 	var value = Session(res[1])
+
 	sess = &value
+	fmt.Println(*sess)
 	return nil
 }
 
@@ -83,6 +85,7 @@ func (sess *Session) query() (*Query, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(data)
 	err = json.Unmarshal(data, &query)
 	if err != nil {
 		return nil, err
