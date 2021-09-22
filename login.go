@@ -250,7 +250,17 @@ func init() {
 		{
 			Rules: []string{`raw ^登陆$`},
 			Handle: func(s core.Sender) interface{} {
-				return "你要登上敌方的陆地？"
+				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
+					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
+				}
+				id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				if _, ok := codes[id]; ok {
+					return "你已在登录中。"
+				}
+				s.Reply("你要登上敌方的陆地？")
+				s.Reply("请输入手机号___________")
+				return nil
+
 			},
 		},
 
