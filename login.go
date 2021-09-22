@@ -229,7 +229,7 @@ func init() {
 			Rules: []string{`raw ^登录$`},
 			Handle: func(s core.Sender) interface{} {
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
-					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
+					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
 				}
 				id := s.GetImType() + fmt.Sprint(s.GetUserID())
 				if _, ok := codes[id]; ok {
