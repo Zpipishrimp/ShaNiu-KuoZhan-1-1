@@ -14,8 +14,8 @@ import (
 var jd_cookie = core.NewBucket("jd_cookie")
 
 type Query struct {
-	Screen interface{} `json:"screen"`
-	Ck     struct {
+	// Screen interface{} `json:"screen"`
+	Ck struct {
 		PtPin interface{} `json:"ptPin"`
 		PtKey interface{} `json:"ptKey"`
 		Empty bool        `json:"empty"`
@@ -147,21 +147,23 @@ func init() {
 				if err := sess.Phone(phone); err != nil {
 					return err
 				}
+				send := false
+				login := false
 				for {
 					query, _ := sess.query()
 					if query.PageStatus == "SESSION_EXPIRED" {
-						return errors.New("对不起，登录超时。")
+						return errors.New("登录超时。")
 					}
 					if query.SessionTimeOut == 0 {
-						return errors.New("对不起，登录超时。")
+						return errors.New("登录超时。")
 					}
-					if query.CanClickLogin {
+					if query.CanClickLogin && !login {
 						//可以点击登录
 						c := make(chan string, 1)
-
 						codes[id] = c
 						select {
 						case sms_code := <-c:
+							s.Reply("正在登录...")
 							sess.login(phone, sms_code)
 						case <-time.After(60 * time.Second):
 							return "验证码超时。"
@@ -176,9 +178,10 @@ func init() {
 					if query.PageStatus == "REQUIRE_VERIFY" {
 						sess.crackCaptcha()
 					}
-					if query.CanSendAuth {
+					if query.CanSendAuth && !send {
 						sess.sendAuthCode()
 						s.Reply("请输入验证码__")
+						send = true
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
