@@ -85,7 +85,7 @@ func (sess *Session) query() (*Query, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(data)
+	fmt.Println(string(data))
 	err = json.Unmarshal(data, &query)
 	if err != nil {
 		return nil, err
@@ -106,6 +106,7 @@ func (sess *Session) Phone(phone string) error {
 		if query.PageStatus == "NORMAL" {
 			break
 		}
+		time.Sleep(time.Second)
 	}
 	err = sess.control("phone", phone)
 	if err != nil {
