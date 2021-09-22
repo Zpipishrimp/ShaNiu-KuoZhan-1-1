@@ -151,7 +151,8 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Handle: func(s core.Sender) interface{} {
 				if jd_cookie.Get("igtg", false) == "true" && s.GetImType() == "tg" && !s.IsAdmin() {
-					return "滚，不欢迎你。"
+					s.Reply("滚，不欢迎你。")
+					return true
 				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
@@ -160,85 +161,102 @@ func init() {
 				if _, ok := codes[id]; ok {
 					return "你已在登录中。"
 				}
-				c := make(chan string, 1)
-				codes[id] = c
-				defer delete(codes, id)
-				var sess = new(Session)
-				phone := s.Get()
-				s.Reply("请稍后，正在模拟环境...")
-				if err := sess.Phone(phone); err != nil {
-					return err
+				if s.GetImType() == "wxmp" {
+					return "一会儿收到验证码发给我哦～"
 				}
-				send := false
-				login := false
-				verify := false
-				success := false
-				sms_code := ""
-				for {
-					query, _ := sess.query()
-					if query.PageStatus == "SESSION_EXPIRED" {
-						return errors.New("登录超时。")
+				go func() {
+					c := make(chan string, 1)
+					codes[id] = c
+					defer delete(codes, id)
+					var sess = new(Session)
+					phone := s.Get()
+					s.Reply("请稍后，正在模拟环境...")
+					if err := sess.Phone(phone); err != nil {
+						s.Reply(err)
+						return
 					}
-					if query.SessionTimeOut == 0 {
-						if success {
-							return nil
+					send := false
+					login := false
+					verify := false
+					success := false
+					sms_code := ""
+					for {
+						query, _ := sess.query()
+						if query.PageStatus == "SESSION_EXPIRED" {
+							s.Reply(errors.New("登录超时。"))
+							return
 						}
-						return errors.New("登录超时。")
-					}
-					if query.CanClickLogin && !login {
-						s.Reply("正在登录...")
-						if err := sess.login(phone, sms_code); err != nil {
-							return err
-						}
-					}
-					if query.PageStatus == "VERIFY_FAILED_MAX" {
-						return errors.New("验证码错误次数过多，请重新获取。")
-					}
-					if query.PageStatus == "VERIFY_CODE_MAX" {
-						return errors.New("对不起，短信验证码请求频繁，请稍后再试。")
-					}
-					if query.PageStatus == "REQUIRE_VERIFY" && !verify {
-						verify = true
-						s.Reply("正在自动验证...")
-						if err := sess.crackCaptcha(); err != nil {
-							return err
-						}
-						s.Reply("验证通过。")
-						s.Reply("请输入验证码______")
-						select {
-						case sms_code = <-c:
-							s.Reply("正在提交验证码...")
-							if err := sess.SmsCode(sms_code); err != nil {
-								return err
+						if query.SessionTimeOut == 0 {
+							if success {
+								return
 							}
-							s.Reply("验证码提交成功。")
-						case <-time.After(60 * time.Second):
-							return "验证码超时。"
+							s.Reply(errors.New("登录超时。"))
+							return
 						}
-					}
-					if query.CanSendAuth && !send {
-						if err := sess.sendAuthCode(); err != nil {
-							return err
+						if query.CanClickLogin && !login {
+							s.Reply("正在登录...")
+							if err := sess.login(phone, sms_code); err != nil {
+								s.Reply(err)
+								return
+							}
 						}
-						send = true
-					}
-					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
+						if query.PageStatus == "VERIFY_FAILED_MAX" {
+							s.Reply(errors.New("验证码错误次数过多，请重新获取。"))
+							return
+						}
+						if query.PageStatus == "VERIFY_CODE_MAX" {
+							s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"))
+							return
+						}
+						if query.PageStatus == "REQUIRE_VERIFY" && !verify {
+							verify = true
+							s.Reply("正在自动验证...")
+							if err := sess.crackCaptcha(); err != nil {
+								s.Reply(err)
+								return
+							}
+							s.Reply("验证通过。")
+							s.Reply("请输入验证码______")
+							select {
+							case sms_code = <-c:
+								s.Reply("正在提交验证码...")
+								if err := sess.SmsCode(sms_code); err != nil {
+									s.Reply(err)
+									return
+								}
+								s.Reply("验证码提交成功。")
+							case <-time.After(60 * time.Second):
+								s.Reply("验证码超时。")
+								return
 
-					}
-					if query.AuthCodeCountDown == -1 && send {
-
-					}
-					if query.PageStatus == "SUCCESS_CK" && !success {
-						core.Senders <- &core.Faker{
-							Message: fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin),
-							UserID:  s.GetUserID(),
-							Type:    s.GetImType(),
+							}
 						}
-						s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录第二个账号。", query.SessionTimeOut))
-						success = true
+						if query.CanSendAuth && !send {
+							if err := sess.sendAuthCode(); err != nil {
+								s.Reply(err)
+								return
+							}
+							send = true
+						}
+						if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
+
+						}
+						if query.AuthCodeCountDown == -1 && send {
+
+						}
+						if query.PageStatus == "SUCCESS_CK" && !success {
+							core.Senders <- &core.Faker{
+								Message: fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin),
+								UserID:  s.GetUserID(),
+								Type:    s.GetImType(),
+							}
+							s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录第二个账号。", query.SessionTimeOut))
+							success = true
+						}
+						time.Sleep(time.Second)
 					}
-					time.Sleep(time.Second)
-				}
+				}()
+				return nil
 			},
 		},
 		{
@@ -268,7 +286,6 @@ func init() {
 				s.Reply("你要登上敌方的陆地？")
 				s.Reply("请输入手机号___________")
 				return nil
-
 			},
 		},
 
@@ -277,8 +294,11 @@ func init() {
 			Handle: func(s core.Sender) interface{} {
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
+					if s.GetImType() == "wxmp" {
+						s.Reply("八九不离十登录成功了，一分钟后对我说\"查询\"确认是否登录成功。")
+					}
 				} else {
-					s.Reply("验证码不存在。")
+					s.Reply("验证码不存在或过期了，请重新登录。")
 				}
 				return nil
 			},
