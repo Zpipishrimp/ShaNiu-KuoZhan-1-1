@@ -20,6 +20,9 @@ func init() {
 				}
 				for _, cron := range crons {
 					if strings.Contains(cron.Name, "推一推") {
+						if cron.Pid != nil && fmt.Sprint(cron.Pid) != "" {
+							return "推一推已在运行中。"
+						}
 						err := qinglong.SetConfigEnv(qinglong.Env{
 							Name:   "tytpacketId",
 							Value:  s.Get(),
