@@ -161,9 +161,6 @@ func init() {
 				if _, ok := codes[id]; ok {
 					return "你已在登录中。"
 				}
-				if s.GetImType() == "wxmp" {
-					return "一会儿收到验证码发给我哦～"
-				}
 				go func() {
 					c := make(chan string, 1)
 					codes[id] = c
@@ -256,6 +253,9 @@ func init() {
 						time.Sleep(time.Second)
 					}
 				}()
+				if s.GetImType() == "wxmp" {
+					return "一会儿收到验证码发给我哦～"
+				}
 				return nil
 			},
 		},
