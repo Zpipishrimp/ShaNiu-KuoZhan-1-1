@@ -245,7 +245,7 @@ func init() {
 		{
 			Rules: []string{`raw ^登陆$`},
 			Handle: func(s core.Sender) interface{} {
-				return "你要等上敌方的陆地？"
+				return "你要登上敌方的陆地？"
 			},
 		},
 
