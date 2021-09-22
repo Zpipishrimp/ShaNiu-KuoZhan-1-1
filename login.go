@@ -52,8 +52,8 @@ func (sess *Session) control(name, value string) error {
 	req.Param("currId", name)
 	req.Param("currValue", value)
 	req.Param("clientSessionId", sess.String())
-	rt, err := req.String()
-	fmt.Println("controll", name, value, rt)
+	_, err := req.String()
+	// fmt.Println("controll", name, value, rt)
 	return err
 }
 
@@ -63,8 +63,8 @@ func (sess *Session) login(phone, sms_code string) error {
 	req.Param("phone", phone)
 	req.Param("sms_code", sms_code)
 	req.Param("clientSessionId", sess.String())
-	rt, err := req.String()
-	fmt.Println(phone, sms_code, rt)
+	_, err := req.String()
+	// fmt.Println(phone, sms_code, rt)
 	return err
 }
 
@@ -82,12 +82,12 @@ func (sess *Session) String() string {
 func (sess *Session) query() (*Query, error) {
 	query := &Query{}
 	address := jd_cookie.Get("address")
-	fmt.Println(sess.String(), "+++")
+	// fmt.Println(sess.String(), "+++")
 	data, err := httplib.Get(fmt.Sprintf("%s/getScreen?clientSessionId=%s", address, sess.String())).Bytes()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(data))
+	// fmt.Println(string(data))
 	err = json.Unmarshal(data, &query)
 	if err != nil {
 		return nil, err
@@ -172,7 +172,6 @@ func init() {
 						if err := sess.login(phone, sms_code); err != nil {
 							return err
 						}
-						s.Reply("登录成功！")
 					}
 					if query.PageStatus == "VERIFY_FAILED_MAX" {
 						return errors.New("验证码错误次数过多，请重新获取。")
@@ -212,7 +211,13 @@ func init() {
 						// return "验证码超时。"
 					}
 					if query.PageStatus == "SUCCESS_CK" {
-						return fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
+						core.Senders <- &core.Faker{
+							Message: fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin),
+							UserID:  s.GetUserID(),
+							Type:    s.GetImType(),
+						}
+						s.Reply("登录成功！")
+						return nil
 					}
 					time.Sleep(time.Second)
 				}
