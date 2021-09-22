@@ -213,7 +213,7 @@ func init() {
 			},
 		},
 		{
-			Rules: []string{`raw ^\d{5}$`},
+			Rules: []string{`raw ^\d{6}$`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
