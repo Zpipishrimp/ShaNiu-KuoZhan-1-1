@@ -143,7 +143,7 @@ func init() {
 				}
 				id := s.GetImType() + fmt.Sprint(s.GetUserID())
 				defer delete(codes, id)
-				var sess *Session
+				var sess = new(Session)
 				phone := s.Get()
 				if err := sess.Phone(phone); err != nil {
 					return err
