@@ -173,12 +173,6 @@ func init() {
 						verify = true
 						sess.crackCaptcha()
 						s.Reply("正在自动验证...")
-
-					}
-					if query.CanSendAuth && !send {
-						sess.sendAuthCode()
-						s.Reply("请输入验证码__")
-						send = true
 						//可以点击登录
 						c := make(chan string, 1)
 						codes[id] = c
@@ -188,6 +182,11 @@ func init() {
 						case <-time.After(60 * time.Second):
 							return "验证码超时。"
 						}
+					}
+					if query.CanSendAuth && !send {
+						sess.sendAuthCode()
+						s.Reply("请输入验证码__")
+						send = true
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
