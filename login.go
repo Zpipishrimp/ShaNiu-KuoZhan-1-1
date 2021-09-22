@@ -52,7 +52,8 @@ func (sess *Session) control(name, value string) error {
 	req.Param("currId", name)
 	req.Param("currValue", value)
 	req.Param("clientSessionId", sess.String())
-	_, err := req.Response()
+	rt, err := req.String()
+	fmt.Println("controll", name, value, rt)
 	return err
 }
 
@@ -62,7 +63,8 @@ func (sess *Session) login(phone, sms_code string) error {
 	req.Param("phone", phone)
 	req.Param("sms_code", sms_code)
 	req.Param("clientSessionId", sess.String())
-	_, err := req.Response()
+	rt, err := req.String()
+	fmt.Println(phone, sms_code, rt)
 	return err
 }
 
