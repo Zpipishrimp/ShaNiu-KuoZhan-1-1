@@ -96,7 +96,10 @@ func (sess *Session) Phone(phone string) error {
 		return err
 	}
 	for {
-		query, _ := sess.query()
+		query, err := sess.query()
+		if err != nil {
+			return err
+		}
 		if query.PageStatus == "NORMAL" {
 			break
 		}
