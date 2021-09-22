@@ -132,6 +132,7 @@ func (sess *Session) crackCaptcha() error {
 var codes map[string]chan string
 
 func init() {
+	codes = map[string]chan string{}
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw ^(\d{11})$`},
