@@ -138,10 +138,12 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+				id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				if _, ok := codes[id]; ok {
 					return "你已在登录中."
 				}
-				id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				c := make(chan string, 1)
+				codes[id] = c
 				defer delete(codes, id)
 				var sess = new(Session)
 				phone := s.Get()
@@ -174,8 +176,6 @@ func init() {
 						sess.crackCaptcha()
 						s.Reply("正在自动验证...")
 						//可以点击登录
-						c := make(chan string, 1)
-						codes[id] = c
 						select {
 						case sms_code = <-c:
 							sess.SmsCode(sms_code)
