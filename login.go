@@ -38,7 +38,7 @@ func (sess *Session) create() error {
 	html, _ := httplib.Get(address).String()
 	res := regexp.MustCompile(`value="([\d\w]+)"`).FindStringSubmatch(html)
 	if len(res) == 0 {
-		return errors.New("匹配不到session")
+		return errors.New("其他用户正在使用，请稍后再试。")
 	}
 	var value = Session(res[1])
 	sess = &value
@@ -177,6 +177,7 @@ func init() {
 					}
 					if query.CanSendAuth {
 						sess.sendAuthCode()
+						s.Reply("请输入验证码__")
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
