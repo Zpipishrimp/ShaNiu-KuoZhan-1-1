@@ -189,7 +189,7 @@ func init() {
 							return err
 						}
 						s.Reply("验证通过。")
-						s.Reply("请输入验证码__")
+						s.Reply("请输入验证码______")
 						select {
 						case sms_code = <-c:
 							s.Reply("正在提交验证码...")
@@ -236,7 +236,7 @@ func init() {
 				if _, ok := codes[id]; ok {
 					return "你已在登录中。"
 				}
-				s.Reply("请输入手机号__")
+				s.Reply("请输入手机号___________")
 				return nil
 			},
 		},
