@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/beego/beego/v2/adapter/httplib"
 	"github.com/cdle/sillyGirl/core"
@@ -54,7 +55,17 @@ func (sess *Session) control(name, value string) error {
 	return err
 }
 
-func (sess *Session) sendAuthCode(phone string) error {
+func (sess *Session) login(phone, sms_code string) error {
+	address := jd_cookie.Get("address")
+	req := httplib.Post(address + "/control")
+	req.Param("phone", phone)
+	req.Param("sms_code", sms_code)
+	req.Param("clientSessionId", sess.String())
+	_, err := req.Response()
+	return err
+}
+
+func (sess *Session) sendAuthCode() error {
 	address := jd_cookie.Get("address")
 	req := httplib.Get(address + "sendAuthCode?clientSessionId=" + sess.String())
 	_, err := req.Response()
@@ -111,24 +122,90 @@ func (sess *Session) crackCaptcha() error {
 	return err
 }
 
-func (sess *Session) Polling() error {
-	for {
-		query, _ := sess.query()
-		if query.PageStatus == "NORMAL" {
-			break
-		}
-		if query.PageStatus == "SESSION_EXPIRED" {
-			return errors.New("对不起，浏览器sessionId失效，请重新获取。")
-		}
-		if query.PageStatus == "VERIFY_FAILED_MAX" {
-			return errors.New("验证码错误次数过多，请重新获取。")
-		}
-		if query.PageStatus == "VERIFY_CODE_MAX" {
-			return errors.New("对不起，短信验证码发送次数已达上限，请24小时后再试。")
-		}
-		if query.PageStatus == "REQUIRE_VERIFY" {
-			//正在破解滑块验证
-		}
-	}
-	return nil
+var codes map[string]chan string
+
+func init() {
+	core.AddCommand("", []core.Function{
+		{
+			Rules: []string{`raw ^(\d{11})$`},
+			Admin: true,
+			Handle: func(s core.Sender) interface{} {
+				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+					return "你已在登录中."
+				}
+				var sess Session
+				phone := s.Get()
+				if err := sess.Phone(phone); err != nil {
+					return err
+				}
+				for {
+					query, _ := sess.query()
+					if query.PageStatus == "NORMAL" {
+						continue
+					}
+					if query.PageStatus == "SESSION_EXPIRED" {
+						return errors.New("对不起，登录超时。")
+					}
+					if query.SessionTimeOut == 0 {
+						return errors.New("对不起，登录超时。")
+					}
+					if query.CanClickLogin {
+						//可以点击登录
+						c := make(chan string, 1)
+						id := s.GetImType() + fmt.Sprint(s.GetUserID())
+						defer delete(codes, id)
+						codes[id] = c
+						select {
+						case sms_code := <-c:
+							sess.login(phone, sms_code)
+						case <-time.After(60 * time.Second):
+							return "验证码超时。"
+						}
+					}
+					if query.PageStatus == "VERIFY_FAILED_MAX" {
+						return errors.New("验证码错误次数过多，请重新获取。")
+					}
+					if query.PageStatus == "VERIFY_CODE_MAX" {
+						return errors.New("对不起，短信验证码请求频繁，请稍后再试。")
+					}
+					if query.PageStatus == "REQUIRE_VERIFY" {
+						sess.crackCaptcha()
+					}
+					if query.CanSendAuth {
+						sess.sendAuthCode()
+					}
+					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
+
+					}
+					if query.PageStatus == "SUCCESS_CK" {
+						return fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
+					}
+					time.Sleep(time.Second)
+				}
+			},
+		},
+		{
+			Rules: []string{`raw ^登录$`},
+			Admin: true,
+			Handle: func(s core.Sender) interface{} {
+				if _, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+					return "你已在登录中."
+				}
+				s.Reply("请输入手机号__")
+				return nil
+			},
+		},
+		{
+			Rules: []string{`raw ^\d{5}$`},
+			Admin: true,
+			Handle: func(s core.Sender) interface{} {
+				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+					code <- s.Get()
+				} else {
+					s.Reply("验证码已过期。")
+				}
+				return nil
+			},
+		},
+	})
 }
