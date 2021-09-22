@@ -34,13 +34,14 @@ type Session struct {
 
 func (sess *Session) create() error {
 	var address = jd_cookie.Get("address")
+	var url = "https://github.com/rubyangxg/jd-qinglong"
 	if address == "" {
-		return errors.New("未配置服务器地址")
+		return errors.New("未配置服务器地址，仓库地址：" + url)
 	}
 	html, _ := httplib.Get(address).String()
 	res := regexp.MustCompile(`value="([\d\w]+)"`).FindStringSubmatch(html)
 	if len(res) == 0 {
-		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址：https://github.com/rubyangxg/jd-qinglong"))
+		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址：https://github.com/rubyangxg/jd-qinglong"+url))
 	}
 	sess.Value = res[1]
 	return nil
