@@ -106,6 +106,9 @@ func (sess *Session) Phone(phone string) error {
 		if query.PageStatus == "NORMAL" {
 			break
 		}
+		if query.PageStatus == "SESSION_EXPIRED" {
+			return sess.Phone(phone)
+		}
 		time.Sleep(time.Second)
 	}
 	err = sess.control("phone", phone)
