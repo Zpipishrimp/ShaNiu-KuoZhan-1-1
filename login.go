@@ -149,6 +149,7 @@ func init() {
 				}
 				send := false
 				login := false
+				verify := false
 				for {
 					query, _ := sess.query()
 					if query.PageStatus == "SESSION_EXPIRED" {
@@ -175,8 +176,10 @@ func init() {
 					if query.PageStatus == "VERIFY_CODE_MAX" {
 						return errors.New("对不起，短信验证码请求频繁，请稍后再试。")
 					}
-					if query.PageStatus == "REQUIRE_VERIFY" {
+					if query.PageStatus == "REQUIRE_VERIFY" && !verify {
+						verify = true
 						sess.crackCaptcha()
+						s.Reply("正在自动验证...")
 					}
 					if query.CanSendAuth && !send {
 						sess.sendAuthCode()
@@ -185,6 +188,9 @@ func init() {
 					}
 					if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
+					}
+					if query.AuthCodeCountDown == -1 {
+						return "验证码超时。"
 					}
 					if query.PageStatus == "SUCCESS_CK" {
 						return fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
