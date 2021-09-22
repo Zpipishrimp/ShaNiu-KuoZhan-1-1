@@ -57,6 +57,10 @@ func init() {
 			})
 		}
 	}()
+	get := func(c chan string, ck JdCookie) {
+		c <- getAsset(&ck)
+		return
+	}
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{`asset ?`, `raw ^查询 (\S+)$`},
@@ -89,8 +93,22 @@ func init() {
 				if len(cks) == 0 {
 					return "没有匹配的京东账号。"
 				}
-				for _, ck := range cks {
-					s.Reply(getAsset(&ck))
+				if s.GetImType() == "wxmp" {
+					cs := []chan string{}
+					for _, ck := range cks {
+						c := make(chan string)
+						cs = append(cs, c)
+						go get(c, ck)
+					}
+					rt := []string{}
+					for _, c := range cs {
+						rt = append(rt, <-c)
+					}
+					s.Reply(rt)
+				} else {
+					for _, ck := range cks {
+						s.Reply(getAsset(&ck))
+					}
 				}
 				return nil
 			},
@@ -155,8 +173,22 @@ func init() {
 				if len(cks) == 0 {
 					return "你尚未绑定🐶东账号，请私聊我你的账号信息。"
 				}
-				for _, ck := range cks {
-					s.Reply(getAsset(&ck))
+				if s.GetImType() == "wxmp" {
+					cs := []chan string{}
+					for _, ck := range cks {
+						c := make(chan string)
+						cs = append(cs, c)
+						go get(c, ck)
+					}
+					rt := []string{}
+					for _, c := range cs {
+						rt = append(rt, <-c)
+					}
+					s.Reply(rt)
+				} else {
+					for _, ck := range cks {
+						s.Reply(getAsset(&ck))
+					}
 				}
 				return nil
 			},
