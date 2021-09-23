@@ -169,14 +169,15 @@ func init() {
 
 				c := make(chan string, 1)
 				codes[id] = c
-				defer delete(codes, id)
 				var sess = new(Session)
 				phone := s.Get()
 				err := sess.create()
 				if err != nil {
+					delete(codes, id)
 					return err
 				}
 				go func() {
+					defer delete(codes, id)
 					s.Reply("请稍后，正在模拟环境...")
 					for {
 						query, err := sess.query()
