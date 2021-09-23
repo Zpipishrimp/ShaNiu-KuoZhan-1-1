@@ -45,7 +45,12 @@ func (sess *Session) create() error {
 	if address == "" {
 		return errors.New("未配置服务器地址，仓库地址：" + url)
 	}
-	html, _ := httplib.Get(address).String()
+	req := httplib.Get(address)
+	req.SetTimeout(time.Second, time.Second)
+	html, err := req.String()
+	if err != nil {
+		return err
+	}
 	res := regexp.MustCompile(`value="([\d\w]+)"`).FindStringSubmatch(html)
 	if len(res) == 0 {
 		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址：https://github.com/rubyangxg/jd-qinglong"+url))
@@ -161,14 +166,34 @@ func init() {
 				if _, ok := codes[id]; ok {
 					return "你已在登录中。"
 				}
+
+				c := make(chan string, 1)
+				codes[id] = c
+				defer delete(codes, id)
+				var sess = new(Session)
+				phone := s.Get()
+				err := sess.create()
+				if err != nil {
+					return err
+				}
 				go func() {
-					c := make(chan string, 1)
-					codes[id] = c
-					defer delete(codes, id)
-					var sess = new(Session)
-					phone := s.Get()
 					s.Reply("请稍后，正在模拟环境...")
-					if err := sess.Phone(phone); err != nil {
+					for {
+						query, err := sess.query()
+						if err != nil {
+							s.Reply(err)
+							return
+						}
+						if query.PageStatus == "NORMAL" {
+							break
+						}
+						if query.PageStatus == "SESSION_EXPIRED" {
+							sess.create()
+						}
+						time.Sleep(time.Second)
+					}
+					err = sess.control("phone", phone)
+					if err != nil {
 						s.Reply(err)
 						return
 					}
@@ -196,6 +221,7 @@ func init() {
 								s.Reply(err)
 								return
 							}
+							login = true
 						}
 						if query.PageStatus == "VERIFY_FAILED_MAX" {
 							s.Reply(errors.New("验证码错误次数过多，请重新获取。"))
