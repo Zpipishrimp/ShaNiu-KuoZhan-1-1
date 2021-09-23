@@ -67,7 +67,7 @@ func init() {
 				c.JSON(200, result)
 				return
 			}
-			rt := ck.Nickname + ",添加成功。"
+			rt := ck.Nickname + "，添加成功。"
 			core.NotifyMasters(rt)
 			result.Message = rt
 			result.Code = 200
@@ -89,7 +89,7 @@ func init() {
 				c.JSON(200, result)
 				return
 			}
-			rt := ck.Nickname + ",更新成功。"
+			rt := ck.Nickname + "，更新成功。"
 			core.NotifyMasters(rt)
 			result.Message = rt
 			result.Code = 200
@@ -158,7 +158,7 @@ func init() {
 					}); err != nil {
 						return err
 					}
-					rt := ck.Nickname + ",添加成功。"
+					rt := ck.Nickname + "，添加成功。"
 					core.NotifyMasters(rt)
 					return rt
 				} else {
@@ -173,7 +173,7 @@ func init() {
 					if err := qinglong.UdpEnv(env); err != nil {
 						return err
 					}
-					rt := ck.Nickname + ",更新成功。"
+					rt := ck.Nickname + "，更新成功。"
 					core.NotifyMasters(rt)
 					return rt
 				}
