@@ -157,6 +157,8 @@ func init() {
 		{
 			Rules: []string{`raw ^(\d{11})$`},
 			Handle: func(s core.Sender) interface{} {
+				s.Delete()
+				s.Disappear(time.Second * 40)
 				if jd_cookie.Get("igtg", false) == "true" && s.GetImType() == "tg" && !s.IsAdmin() {
 					s.Reply("滚，不欢迎你。")
 					return true
@@ -180,11 +182,11 @@ func init() {
 				}
 				go func() {
 					defer delete(codes, id)
-					s.Reply("请稍后，正在模拟环境...")
+					s.Reply("请稍后，正在模拟环境...", core.E)
 					for {
 						query, err := sess.query()
 						if err != nil {
-							s.Reply(err)
+							s.Reply(err, core.E)
 							return
 						}
 						if query.PageStatus == "NORMAL" {
@@ -197,7 +199,7 @@ func init() {
 					}
 					err = sess.control("phone", phone)
 					if err != nil {
-						s.Reply(err)
+						s.Reply(err, core.E)
 						return
 					}
 					send := false
@@ -208,58 +210,58 @@ func init() {
 					for {
 						query, _ := sess.query()
 						if query.PageStatus == "SESSION_EXPIRED" {
-							s.Reply(errors.New("登录超时。"))
+							s.Reply(errors.New("登录超时。"), core.E)
 							return
 						}
 						if query.SessionTimeOut == 0 {
 							if success {
 								return
 							}
-							s.Reply(errors.New("登录超时。"))
+							s.Reply(errors.New("登录超时。"), core.E)
 							return
 						}
 						if query.CanClickLogin && !login {
-							s.Reply("正在登录...")
+							s.Reply("正在登录...", core.E)
 							if err := sess.login(phone, sms_code); err != nil {
-								s.Reply(err)
+								s.Reply(err, core.E)
 								return
 							}
 							login = true
 						}
 						if query.PageStatus == "VERIFY_FAILED_MAX" {
-							s.Reply(errors.New("验证码错误次数过多，请重新获取。"))
+							s.Reply(errors.New("验证码错误次数过多，请重新获取。"), core.E)
 							return
 						}
 						if query.PageStatus == "VERIFY_CODE_MAX" {
-							s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"))
+							s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"), core.E)
 							return
 						}
 						if query.PageStatus == "REQUIRE_VERIFY" && !verify {
 							verify = true
-							s.Reply("正在自动验证...")
+							s.Reply("正在自动验证...", core.E)
 							if err := sess.crackCaptcha(); err != nil {
-								s.Reply(err)
+								s.Reply(err, core.E)
 								return
 							}
-							s.Reply("验证通过。")
-							s.Reply("请输入验证码______")
+							s.Reply("验证通过。", core.E)
+							s.Reply("请输入验证码______", core.E)
 							select {
 							case sms_code = <-c:
-								s.Reply("正在提交验证码...")
+								s.Reply("正在提交验证码...", core.E)
 								if err := sess.SmsCode(sms_code); err != nil {
-									s.Reply(err)
+									s.Reply(err, core.E)
 									return
 								}
-								s.Reply("验证码提交成功。")
+								s.Reply("验证码提交成功。", core.E)
 							case <-time.After(60 * time.Second):
-								s.Reply("验证码超时。")
+								s.Reply("验证码超时。", core.E)
 								return
 
 							}
 						}
 						if query.CanSendAuth && !send {
 							if err := sess.sendAuthCode(); err != nil {
-								s.Reply(err)
+								s.Reply(err, core.E)
 								return
 							}
 							send = true
@@ -276,7 +278,7 @@ func init() {
 								UserID:  s.GetUserID(),
 								Type:    s.GetImType(),
 							}
-							s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录下一个账号。", query.SessionTimeOut))
+							s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录下一个账号。", query.SessionTimeOut), core.E)
 							success = true
 						}
 						time.Sleep(time.Second)
@@ -313,7 +315,7 @@ func init() {
 					return "你已在登录中。"
 				}
 				s.Reply("你要登上敌方的陆地？")
-				s.Reply("请输入手机号___________")
+				s.Reply("请输入手机号___________", time.Duration(time.Second*5))
 				return nil
 			},
 		},
@@ -321,6 +323,7 @@ func init() {
 		{
 			Rules: []string{`raw ^(\d{6})$`},
 			Handle: func(s core.Sender) interface{} {
+				s.Delete()
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
 					if s.GetImType() == "wxmp" {
