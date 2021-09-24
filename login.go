@@ -143,7 +143,9 @@ func (sess *Session) SmsCode(sms_code string) error {
 
 func (sess *Session) crackCaptcha() error {
 	address := sess.address()
-	_, err := httplib.Get(fmt.Sprintf("%s/crackCaptcha?clientSessionId=%s", address, sess.String())).Response()
+	req := httplib.Get(fmt.Sprintf("%s/crackCaptcha?clientSessionId=%s", address, sess.String()))
+	req.SetTimeout(time.Second*10, time.Second*10)
+	_, err := req.Response()
 	return err
 }
 
