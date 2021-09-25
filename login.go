@@ -209,7 +209,9 @@ func init() {
 					for {
 						query, _ := sess.query()
 						if query.PageStatus == "SESSION_EXPIRED" {
-							s.Reply(errors.New("登录超时。"), core.E)
+							if !login {
+								s.Reply(errors.New("登录超时。"), core.E)
+							}
 							return
 						}
 						if query.SessionTimeOut == 0 {
