@@ -70,6 +70,9 @@ func init() {
 					s.Disappear(time.Second * 40)
 				}
 				a := s.Get()
+				if a == "300" {
+					a = "3"
+				}
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
 					return err
