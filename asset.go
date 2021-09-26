@@ -415,12 +415,26 @@ func (ck *JdCookie) QueryAsset() string {
 		end := false
 		for {
 			if end {
-				msgs = append(msgs, []string{
-					fmt.Sprintf("昨日收入：%d京豆", asset.Bean.YestodayIn),
-					fmt.Sprintf("昨日支出：%d京豆", asset.Bean.YestodayOut),
-					fmt.Sprintf("今日收入：%d京豆", asset.Bean.TodayIn),
-					fmt.Sprintf("今日支出：%d京豆", asset.Bean.TodayOut),
-				}...)
+				if asset.Bean.YestodayIn != 0 {
+					msgs = append(msgs,
+						fmt.Sprintf("昨日收入：%d京豆", asset.Bean.YestodayIn),
+					)
+				}
+				if asset.Bean.YestodayOut != 0 {
+					msgs = append(msgs,
+						fmt.Sprintf("昨日支出：%d京豆", asset.Bean.YestodayOut),
+					)
+				}
+				if asset.Bean.TodayIn != 0 {
+					msgs = append(msgs,
+						fmt.Sprintf("今日收入：%d京豆", asset.Bean.TodayIn),
+					)
+				}
+				if asset.Bean.TodayOut != 0 {
+					msgs = append(msgs,
+						fmt.Sprintf("今日支出：%d京豆", asset.Bean.TodayOut),
+					)
+				}
 				break
 			}
 			bds := getJingBeanBalanceDetail(page, cookie)
