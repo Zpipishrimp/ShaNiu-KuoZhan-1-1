@@ -14,6 +14,9 @@ func init() {
 			Rules: []string{`raw packetId=(\S+)(&|&amp;)currentActId`},
 			// Admin: true,
 			Handle: func(s core.Sender) interface{} {
+				if s.GetImType() == "tg" {
+					return "滚"
+				}
 				crons, err := qinglong.GetCrons("")
 				if err != nil {
 					return err
