@@ -1065,7 +1065,7 @@ func tytCoupon(cookie string, state chan string) {
 			}
 		}
 		if num == 0 {
-			rt = "无优惠券"
+			rt = ""
 		} else {
 			rt = fmt.Sprintf("%d张5元优惠券", num)
 			if toexp > 0 {
