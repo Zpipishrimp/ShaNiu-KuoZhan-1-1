@@ -525,15 +525,17 @@ func (ck *JdCookie) QueryAsset() string {
 		msgs = append(msgs, fmt.Sprintf("东东农场：%s", <-fruit))
 		msgs = append(msgs, fmt.Sprintf("东东萌宠：%s", <-pet))
 		gn := <-gold
-		msgs = append(msgs, fmt.Sprintf("极速金币：%d(≈%.2f元)💰", gn, float64(gn)/10000))
+		if gn >= 30000 {
+			msgs = append(msgs, fmt.Sprintf("极速金币：%d(≈%.2f元)💰", gn, float64(gn)/10000))
+		}
 		zjbn := <-zjb
-		if zjbn != 0 {
+		if zjbn >= 50000 {
 			msgs = append(msgs, fmt.Sprintf("京东赚赚：%d金币(≈%.2f元)💰", zjbn, float64(zjbn)/10000))
 		} else {
 			// msgs = append(msgs, fmt.Sprintf("京东赚赚：暂无数据"))
 		}
 		mmcCoin := <-mmc
-		if mmcCoin != 0 {
+		if mmcCoin >= 3000 {
 			msgs = append(msgs, fmt.Sprintf("京东秒杀：%d秒秒币(≈%.2f元)💰", mmcCoin, float64(mmcCoin)/1000))
 		} else {
 			// msgs = append(msgs, fmt.Sprintf("京东秒杀：暂无数据"))
