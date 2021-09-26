@@ -207,7 +207,11 @@ func init() {
 					success := false
 					sms_code := ""
 					for {
-						query, _ := sess.query()
+						query, err := sess.query()
+						if err != nil {
+							s.Reply(err, core.E)
+							return
+						}
 						if query.PageStatus == "SESSION_EXPIRED" {
 							if !login {
 								s.Reply(errors.New("登录超时。"), core.E)
