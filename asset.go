@@ -535,7 +535,8 @@ func (ck *JdCookie) QueryAsset() string {
 			msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
 		}
 		msgs = append(msgs, []string{
-			"提醒：该账号已过期，请重新登录。多账号的🐑毛党员注意了，登录第2个账号的时候，不可以退出第1个账号，退出会造成账号过期。可以在登录第2个账号前清除浏览器cookie，或者使用浏览器的无痕模式。",
+			// "提醒：该账号已过期，请重新登录。多账号的🐑毛党员注意了，登录第2个账号的时候，不可以退出第1个账号，退出会造成账号过期。可以在登录第2个账号前清除浏览器cookie，或者使用浏览器的无痕模式。",
+			"提醒：该账号已过期，请对我说“登录“。”",
 		}...)
 	}
 	ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
