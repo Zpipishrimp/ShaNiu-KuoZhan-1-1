@@ -158,7 +158,7 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
-				if jd_cookie.Get("igtg", false) == "true" && s.GetImType() == "tg" && !s.IsAdmin() {
+				if jd_cookie.GetBool("igtg", false) == true && s.GetImType() == "tg" && !s.IsAdmin() {
 					s.Reply("滚，不欢迎你。")
 					return true
 				}

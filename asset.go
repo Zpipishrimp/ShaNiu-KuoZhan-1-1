@@ -386,9 +386,7 @@ var Float64 = func(s string) float64 {
 func (ck *JdCookie) QueryAsset() string {
 	msgs := []string{}
 	if ck.Note != "" {
-		if runtime.GOOS != "darwin" {
-			msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
-		}
+		msgs = append(msgs, fmt.Sprintf("账号备注：%s", ck.Note))
 	}
 	asset := Asset{}
 	if ck.Available() {
@@ -491,13 +489,22 @@ func (ck *JdCookie) QueryAsset() string {
 				}
 				return ""
 			}
-			msgs = append(msgs, []string{
-				fmt.Sprintf("所有红包：%.2f%s元🧧", asset.RedPacket.Total, e(asset.RedPacket.ToExpire)),
-				fmt.Sprintf("京喜红包：%.2f%s元", asset.RedPacket.Jx, e(asset.RedPacket.ToExpireJx)),
-				fmt.Sprintf("极速红包：%.2f%s元", asset.RedPacket.Js, e(asset.RedPacket.ToExpireJs)),
-				// fmt.Sprintf("健康红包：%.2f%s元", asset.RedPacket.Jk, e(asset.RedPacket.ToExpireJk)),
-				fmt.Sprintf("京东红包：%.2f%s元", asset.RedPacket.Jd, e(asset.RedPacket.ToExpireJd)),
-			}...)
+			if asset.RedPacket.Total != 0 {
+				msgs = append(msgs, fmt.Sprintf("所有红包：%.2f%s元🧧", asset.RedPacket.Total, e(asset.RedPacket.ToExpire)))
+				if asset.RedPacket.Jx != 0 {
+					msgs = append(msgs, fmt.Sprintf("京喜红包：%.2f%s元", asset.RedPacket.Jx, e(asset.RedPacket.ToExpireJx)))
+				}
+				if asset.RedPacket.Js != 0 {
+					msgs = append(msgs, fmt.Sprintf("极速红包：%.2f%s元", asset.RedPacket.Js, e(asset.RedPacket.ToExpireJs)))
+				}
+				if asset.RedPacket.Jd != 0 {
+					msgs = append(msgs, fmt.Sprintf("京东红包：%.2f%s元", asset.RedPacket.Jd, e(asset.RedPacket.ToExpireJd)))
+				}
+				if asset.RedPacket.Jk != 0 {
+					msgs = append(msgs, fmt.Sprintf("健康红包：%.2f%s元", asset.RedPacket.Jk, e(asset.RedPacket.ToExpireJk)))
+				}
+			}
+
 		} else {
 			// msgs = append(msgs, "暂无红包数据🧧")
 		}
@@ -509,31 +516,35 @@ func (ck *JdCookie) QueryAsset() string {
 		if zjbn != 0 {
 			msgs = append(msgs, fmt.Sprintf("京东赚赚：%d金币(≈%.2f元)💰", zjbn, float64(zjbn)/10000))
 		} else {
-			msgs = append(msgs, fmt.Sprintf("京东赚赚：暂无数据"))
+			// msgs = append(msgs, fmt.Sprintf("京东赚赚：暂无数据"))
 		}
 		mmcCoin := <-mmc
 		if mmcCoin != 0 {
 			msgs = append(msgs, fmt.Sprintf("京东秒杀：%d秒秒币(≈%.2f元)💰", mmcCoin, float64(mmcCoin)/1000))
 		} else {
-			msgs = append(msgs, fmt.Sprintf("京东秒杀：暂无数据"))
+			// msgs = append(msgs, fmt.Sprintf("京东秒杀：暂无数据"))
 		}
-		msgs = append(msgs, fmt.Sprintf("推一推券：%s", <-tyt))
-		msgs = append(msgs, fmt.Sprintf("惊喜牧场：%d枚鸡蛋🥚", <-egg))
+		if tyt := <-tyt; tyt != "" {
+			msgs = append(msgs, fmt.Sprintf("推一推券：%s", tyt))
+		}
+		if egg := <-egg; egg != 0 {
+			msgs = append(msgs, fmt.Sprintf("惊喜牧场：%d枚鸡蛋🥚", egg))
+		}
 		// if ck.Note != "" {
 		// 	msgs = append([]string{
 		// 		fmt.Sprintf("账号备注：%s", ck.Note),
 		// 	}, msgs...)
 		// }
 		if runtime.GOOS != "darwin" {
-			msgs = append([]string{
-				fmt.Sprintf("账号昵称：%s", ck.Nickname),
-			}, msgs...)
+			if ck.Nickname != "" {
+				msgs = append([]string{
+					fmt.Sprintf("账号昵称：%s", ck.Nickname),
+				}, msgs...)
+			}
 		}
 	} else {
 		ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
-		if runtime.GOOS != "darwin" {
-			msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
-		}
+		msgs = append(msgs, fmt.Sprintf("京东账号：%s", ck.PtPin))
 		msgs = append(msgs, []string{
 			// "提醒：该账号已过期，请重新登录。多账号的🐑毛党员注意了，登录第2个账号的时候，不可以退出第1个账号，退出会造成账号过期。可以在登录第2个账号前清除浏览器cookie，或者使用浏览器的无痕模式。",
 			"提醒：该账号已过期，请对我说“登录“。”",
@@ -1039,7 +1050,7 @@ func tytCoupon(cookie string, state chan string) {
 	req.Header("Referer", "https://st.jingxi.com/my/coupon/jx.shtml?sceneval=2&ptag=7155.1.18")
 	data, _ := req.Bytes()
 	res := regexp.MustCompile(`jsonpCBKB[(](.*)\s+[)];}catch`).FindSubmatch(data)
-	rt := "暂无数据"
+	rt := ""
 	if len(res) > 0 {
 		json.Unmarshal(res[1], &a)
 		num := 0
