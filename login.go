@@ -328,7 +328,7 @@ func init() {
 		{
 			Rules: []string{`raw ^(\d{6})$`},
 			Handle: func(s core.Sender) interface{} {
-				s.Reply(fmt.Printf("验证码为：%s", s.Get()))
+				s.Reply(fmt.Sprintf("验证码为：%s", s.Get()))
 				s.Delete()
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
