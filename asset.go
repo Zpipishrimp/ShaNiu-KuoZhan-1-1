@@ -127,7 +127,7 @@ func init() {
 					pt_key := core.FetchCookieValue(env.Value, "pt_key")
 
 					for _, tp := range []string{
-						"qq", "tg", "wxmp",
+						"qq", "tg",
 					} {
 						core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 							if string(k) == pt_pin && pt_pin != "" {
