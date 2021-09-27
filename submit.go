@@ -130,53 +130,63 @@ func init() {
 			Handle: func(s core.Sender) interface{} {
 				s.Reply(s.Delete())
 				s.Disappear(time.Second * 20)
-				ck := &JdCookie{
-					PtKey: s.Get(0),
-					PtPin: s.Get(1),
-				}
-				if !ck.Available() {
-					return "无效的ck，请重试。"
-				}
-				value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
-				envs, err := qinglong.GetEnvs("JD_COOKIE")
-				if err != nil {
-					return err
-				}
-				find := false
-				for _, env := range envs {
-					if strings.Contains(env.Value, fmt.Sprintf("pt_pin=%s;", ck.PtPin)) {
-						envs = []qinglong.Env{env}
-						find = true
-						break
+				for _, v := range s.GetAllMatch() {
+					ck := &JdCookie{
+						PtKey: v[0],
+						PtPin: v[1],
 					}
-				}
-				pin(s.GetImType()).Set(ck.PtPin, s.GetUserID())
-				if !find {
-					if err := qinglong.AddEnv(qinglong.Env{
-						Name:  "JD_COOKIE",
-						Value: value,
-					}); err != nil {
-						return err
+					if !ck.Available() {
+						s.Reply("无效的ck，请重试。")
+						continue
 					}
-					rt := ck.Nickname + "，添加成功。"
-					core.NotifyMasters(rt)
-					return rt
-				} else {
-					env := envs[0]
-					env.Value = value
-					if env.Status != 0 {
-						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
-							return err
+					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
+					envs, err := qinglong.GetEnvs("JD_COOKIE")
+					if err != nil {
+						s.Reply(err)
+						continue
+					}
+					find := false
+					for _, env := range envs {
+						if strings.Contains(env.Value, fmt.Sprintf("pt_pin=%s;", ck.PtPin)) {
+							envs = []qinglong.Env{env}
+							find = true
+							break
 						}
 					}
-					env.Status = 0
-					if err := qinglong.UdpEnv(env); err != nil {
-						return err
+					pin(s.GetImType()).Set(ck.PtPin, s.GetUserID())
+					if !find {
+						if err := qinglong.AddEnv(qinglong.Env{
+							Name:  "JD_COOKIE",
+							Value: value,
+						}); err != nil {
+							s.Reply(err)
+							continue
+						}
+						rt := ck.Nickname + "，添加成功。"
+						core.NotifyMasters(rt)
+						s.Reply(rt)
+						continue
+					} else {
+						env := envs[0]
+						env.Value = value
+						if env.Status != 0 {
+							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+								s.Reply(err)
+								continue
+							}
+						}
+						env.Status = 0
+						if err := qinglong.UdpEnv(env); err != nil {
+							s.Reply(err)
+							continue
+						}
+						rt := ck.Nickname + "，更新成功。"
+						core.NotifyMasters(rt)
+						s.Reply(rt)
+						continue
 					}
-					rt := ck.Nickname + "，更新成功。"
-					core.NotifyMasters(rt)
-					return rt
 				}
+				return nil
 			},
 		},
 		{
