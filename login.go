@@ -328,9 +328,6 @@ func init() {
 		{
 			Rules: []string{`raw ^(\d{6})$`},
 			Handle: func(s core.Sender) interface{} {
-				if s.Get() == "799005" {
-					return nil
-				}
 				s.Delete()
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
