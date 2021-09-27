@@ -278,8 +278,14 @@ func init() {
 
 						}
 						if query.PageStatus == "SUCCESS_CK" && !success {
+							cookie := fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
+							qq := ""
+							if s.GetImType() == "qq" {
+								qq = fmt.Sprint(s.GetUserID())
+							}
+							xdd(cookie, qq)
 							core.Senders <- &core.Faker{
-								Message: fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin),
+								Message: cookie,
 								UserID:  s.GetUserID(),
 								Type:    s.GetImType(),
 							}
