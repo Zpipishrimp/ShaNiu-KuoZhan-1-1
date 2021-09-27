@@ -8,6 +8,6 @@ func xdd(cookie string, qq string) {
 		req := httplib.Post(xdd_url)
 		req.Param("ck", cookie)
 		req.Param("qq", qq)
-		req.String()
+		req.Response()
 	}
 }
