@@ -149,6 +149,13 @@ func (sess *Session) crackCaptcha() error {
 	return err
 }
 
+func (sess *Session) releaseSession() error {
+	address := sess.address()
+	req := httplib.Get(fmt.Sprintf("%s/releaseSession?clientSessionId=%s", address, sess.String()))
+	_, err := req.Response()
+	return err
+}
+
 var codes map[string]chan string
 
 func init() {
@@ -180,6 +187,7 @@ func init() {
 				}
 				go func() {
 					defer delete(codes, id)
+					defer sess.releaseSession()
 					s.Reply("请稍后，正在模拟环境...", core.E)
 					for {
 						query, err := sess.query()
@@ -236,7 +244,7 @@ func init() {
 							s.Reply(errors.New("验证码错误次数过多，请重新获取。"), core.E)
 							return
 						}
-						if query.PageStatus == "VERIFY_CODE_MAX" {
+						if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
 							s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"), core.E)
 							return
 						}
@@ -260,7 +268,6 @@ func init() {
 							case <-time.After(60 * time.Second):
 								s.Reply("验证码超时。", core.E)
 								return
-
 							}
 						}
 						if query.CanSendAuth && !send {
@@ -290,8 +297,9 @@ func init() {
 							}
 							s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录下一个账号。", query.SessionTimeOut), core.E)
 							success = true
+							return
 						}
-						time.Sleep(time.Second)
+						time.Sleep(time.Millisecond * 300)
 					}
 				}()
 				if s.GetImType() == "wxmp" {
