@@ -160,6 +160,14 @@ var codes map[string]chan string
 
 func init() {
 	codes = map[string]chan string{}
+	core.BeforeStop = append(core.BeforeStop, func() {
+		for {
+			if len(codes) == 0 {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+	})
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw ^(\d{11})$`},
@@ -315,7 +323,7 @@ func init() {
 								UserID:  s.GetUserID(),
 								Type:    s.GetImType(),
 							}
-							s.Reply(fmt.Sprintf("登录成功，你可以登录下一个账号。", query.SessionTimeOut), core.E)
+							s.Reply("登录成功，你可以登录下一个账号。", core.E)
 							success = true
 							return
 						}
