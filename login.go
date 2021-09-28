@@ -258,6 +258,7 @@ func init() {
 										return
 									}
 									s.Reply("验证码提交成功。", core.E)
+									break
 								case <-time.After(time.Millisecond * 300):
 									query, err := sess.query()
 									if err != nil {
