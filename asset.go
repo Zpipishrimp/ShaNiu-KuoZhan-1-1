@@ -35,7 +35,7 @@ var assets sync.Map
 var queryAssetLocker sync.Mutex
 var getAsset = func(ck *JdCookie) string {
 	if asset, ok := assets.Load(ck.PtPin); ok {
-		return asset.(string) + "\n(结果来自缓存，10分钟后更新。)"
+		return asset.(string)
 	}
 	queryAssetLocker.Lock()
 	defer queryAssetLocker.Unlock()
@@ -570,7 +570,11 @@ func (ck *JdCookie) QueryAsset() string {
 		}...)
 	}
 	ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
-	return strings.Join(msgs, "\n")
+	rt := strings.Join(msgs, "\n")
+	if jd_cookie.GetBool("tuyalize", false) == true {
+
+	}
+	return rt
 }
 
 type BeanDetail struct {

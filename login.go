@@ -274,6 +274,9 @@ func init() {
 										s.Reply(err, core.E)
 										return
 									}
+									if query.PageStatus == "SESSION_EXPIRED" {
+										goto HELL
+									}
 									if query.PageStatus == "VERIFY_FAILED_MAX" {
 										s.Reply("验证码错误次数过多，请重新获取。", core.E)
 										return
@@ -284,7 +287,7 @@ func init() {
 									}
 									if query.AuthCodeCountDown <= 0 {
 										timeout++
-										if timeout > 5 {
+										if timeout > 20 {
 											s.Reply("验证码超时，登录失败。", core.E)
 											return
 										}
