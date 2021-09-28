@@ -258,7 +258,7 @@ func init() {
 										return
 									}
 									s.Reply("验证码提交成功。", core.E)
-									break
+									goto HELL
 								case <-time.After(time.Millisecond * 300):
 									query, err := sess.query()
 									if err != nil {
@@ -284,6 +284,7 @@ func init() {
 
 								}
 							}
+						HELL:
 						}
 						if query.CanSendAuth && !send {
 							if err := sess.sendAuthCode(); err != nil {
