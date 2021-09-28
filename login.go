@@ -303,6 +303,12 @@ func init() {
 		{
 			Rules: []string{`raw ^登录$`},
 			Handle: func(s core.Sender) interface{} {
+				if groupCode := jd_cookie.GetInt("groupCode"); groupCode != 0 && s.GetChatID() != 0 && groupCode != s.GetChatID() {
+					s.Delete()
+					s.Disappear()
+					s.Reply("傻妞已崩溃。")
+					return nil
+				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
 				}
