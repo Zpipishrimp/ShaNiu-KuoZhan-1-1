@@ -12,7 +12,7 @@ func init() {
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw packetId=(\S+)(&|&amp;)currentActId`},
-			// Admin: true,
+			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if s.GetImType() == "tg" {
 					return "滚"
