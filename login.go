@@ -158,9 +158,9 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
-				if jd_cookie.GetBool("igtg", false) == true && s.GetImType() == "tg" && !s.IsAdmin() {
-					s.Reply("滚，不欢迎你。")
-					return true
+				if groupCode := jd_cookie.GetInt("groupCode"); groupCode != 0 && groupCode == s.GetChatID() {
+					s.Reply("傻妞已崩溃。")
+					return nil
 				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
