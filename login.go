@@ -240,14 +240,6 @@ func init() {
 							}
 							login = true
 						}
-						if query.PageStatus == "VERIFY_FAILED_MAX" {
-							s.Reply(errors.New("验证码错误次数过多，请重新获取。"), core.E)
-							return
-						}
-						if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
-							s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"), core.E)
-							return
-						}
 						if query.PageStatus == "REQUIRE_VERIFY" && !verify {
 							verify = true
 							s.Reply("正在自动验证...", core.E)
@@ -257,17 +249,37 @@ func init() {
 							}
 							s.Reply("验证通过。", core.E)
 							s.Reply("请输入验证码______", core.E)
-							select {
-							case sms_code = <-c:
-								s.Reply("正在提交验证码...", core.E)
-								if err := sess.SmsCode(sms_code); err != nil {
-									s.Reply(err, core.E)
-									return
+							for {
+								select {
+								case sms_code = <-c:
+									s.Reply("正在提交验证码...", core.E)
+									if err := sess.SmsCode(sms_code); err != nil {
+										s.Reply(err, core.E)
+										return
+									}
+									s.Reply("验证码提交成功。", core.E)
+								case <-time.After(time.Millisecond * 300):
+									query, err := sess.query()
+									if err != nil {
+										s.Reply(err, core.E)
+										return
+									}
+									if query.PageStatus == "VERIFY_FAILED_MAX" {
+										s.Reply(errors.New("验证码错误次数过多，请重新获取。"), core.E)
+										return
+									}
+									if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
+										s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"), core.E)
+										return
+									}
+									if query.AuthCodeCountDown <= 0 {
+										s.Reply("验证码超时，登录失败。", core.E)
+										return
+									} else {
+										s.Reply(fmt.Sprintf("验证码倒计时：%d秒。", query.AuthCodeCountDown))
+									}
+
 								}
-								s.Reply("验证码提交成功。", core.E)
-							case <-time.After(60 * time.Second):
-								s.Reply("验证码超时。", core.E)
-								return
 							}
 						}
 						if query.CanSendAuth && !send {
@@ -299,7 +311,7 @@ func init() {
 							success = true
 							return
 						}
-						time.Sleep(time.Millisecond * 300)
+						time.Sleep(time.Second)
 					}
 				}()
 				if s.GetImType() == "wxmp" {
