@@ -223,6 +223,7 @@ func init() {
 					sms_code := ""
 					for {
 						query, err := sess.query()
+						fmt.Println(query.PageStatus, "----")
 						if err != nil {
 							s.Reply(err, core.E)
 							return
@@ -270,6 +271,7 @@ func init() {
 									goto HELL
 								case <-time.After(time.Millisecond * 300):
 									query, err := sess.query()
+									fmt.Println(query.PageStatus, "++++")
 									if err != nil {
 										s.Reply(err, core.E)
 										return
