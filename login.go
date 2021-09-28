@@ -311,7 +311,7 @@ func init() {
 								UserID:  s.GetUserID(),
 								Type:    s.GetImType(),
 							}
-							s.Reply(fmt.Sprintf("登录成功，%v秒后可以登录下一个账号。", query.SessionTimeOut), core.E)
+							s.Reply(fmt.Sprintf("登录成功，你可以登录下一个账号。", query.SessionTimeOut), core.E)
 							success = true
 							return
 						}
