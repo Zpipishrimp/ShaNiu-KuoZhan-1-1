@@ -277,9 +277,9 @@ func init() {
 										s.Reply("验证码超时，登录失败。", core.E)
 										return
 									} else if query.AuthCodeCountDown > 0 {
-										if s.GetImType() == "tg" {
-											s.Reply(fmt.Sprintf("验证码倒计时：%d秒。", query.AuthCodeCountDown), core.E)
-										}
+										// if s.GetImType() == "tg" {
+										// 	s.Reply(fmt.Sprintf("验证码倒计时：%d秒。", query.AuthCodeCountDown), core.E)
+										// }
 									}
 
 								}
