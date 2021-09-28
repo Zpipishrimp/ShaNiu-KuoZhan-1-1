@@ -223,7 +223,6 @@ func init() {
 					sms_code := ""
 					for {
 						query, err := sess.query()
-						fmt.Println(query.PageStatus, "----")
 						if err != nil {
 							s.Reply(err, core.E)
 							return
@@ -271,17 +270,16 @@ func init() {
 									goto HELL
 								case <-time.After(time.Millisecond * 300):
 									query, err := sess.query()
-									fmt.Println(query.PageStatus, "++++")
 									if err != nil {
 										s.Reply(err, core.E)
 										return
 									}
 									if query.PageStatus == "VERIFY_FAILED_MAX" {
-										s.Reply(errors.New("验证码错误次数过多，请重新获取。"), core.E)
+										s.Reply("验证码错误次数过多，请重新获取。", core.E)
 										return
 									}
 									if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
-										s.Reply(errors.New("对不起，短信验证码请求频繁，请稍后再试。"), core.E)
+										s.Reply("对不起，短信验证码请求频繁，请稍后再试。", core.E)
 										return
 									}
 									if query.AuthCodeCountDown <= 0 {
