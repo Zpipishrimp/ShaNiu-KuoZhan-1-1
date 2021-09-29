@@ -135,6 +135,9 @@ func init() {
 						PtKey: v[0],
 						PtPin: v[1],
 					}
+					if len(ck.PtKey) <= 20 {
+						s.Reply("再捣乱我就报警啦！")
+					}
 					if !ck.Available() {
 						s.Reply("无效的ck，请重试。")
 						continue
@@ -196,6 +199,7 @@ func init() {
 				s.Reply(s.Delete())
 				s.Disappear(time.Second * 20)
 				value := fmt.Sprintf("pin=%s;wskey=%s;", s.Get(0), s.Get(1))
+
 				pt_key, err := getKey(value)
 				if err == nil {
 					if strings.Contains(pt_key, "fake") {
