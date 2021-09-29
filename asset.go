@@ -1152,18 +1152,18 @@ func (ck *JdCookie) Available() bool {
 	}
 	ui := &UserInfoResult{}
 	if nil != json.Unmarshal(data, ui) {
-		return true
+		return av2(ck)
 	}
 	switch ui.Retcode {
-	case "1001": //ck.BeanNum
-		if ui.Msg == "not login" {
-			return false
-		}
+	// case "1001": //ck.BeanNum
+	// 	if ui.Msg == "not login" {
+	// 		return false
+	// 	}
 	case "0":
 		realPin := url.QueryEscape(ui.Data.UserInfo.BaseInfo.CurPin)
 		if realPin != ck.PtPin {
 			if realPin == "" {
-				return av2(cookie)
+				return av2(ck)
 			} else {
 				ck.PtPin = realPin
 			}
@@ -1176,10 +1176,10 @@ func (ck *JdCookie) Available() bool {
 		}
 		return true
 	}
-	return av2(cookie)
+	return av2(ck)
 }
 
-func av2(cookie string) bool {
+func av2(ck *JdCookie) bool {
 	req := httplib.Get(`https://m.jingxi.com/user/info/GetJDUserBaseInfo?_=1629334995401&sceneval=2&g_login_type=1&g_ty=ls`)
 	req.Header("User-Agent", ua)
 	req.Header("Host", "m.jingxi.com")
@@ -1188,12 +1188,13 @@ func av2(cookie string) bool {
 	req.Header("Accept-Language", "zh-cn")
 	req.Header("Accept-Encoding", "gzip, deflate, br")
 	req.Header("Referer", "https://st.jingxi.com/my/userinfo.html?&ptag=7205.12.4")
-	req.Header("Cookie", cookie)
-	data, err := req.String()
+	req.Header("Cookie", "pt_key="+ck.PtKey+";pt_pin="+ck.PtPin+";")
+	data, err := req.Bytes()
 	if err != nil {
-		return true
+		return false
 	}
-	return !strings.Contains(data, "login")
+	ck.Nickname, _ = jsonparser.GetString(data, "nickname")
+	return ck.Nickname != ""
 }
 
 type UserInfoResult struct {
