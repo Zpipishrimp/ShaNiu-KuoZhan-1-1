@@ -47,24 +47,24 @@ func (sess *Session) create() error {
 	}
 	req := httplib.Get(address)
 	req.SetTimeout(time.Second, time.Second)
-	html, err := req.String()
+	rsp, err := req.Response()
 	if err != nil {
 		return err
 	}
-	res := regexp.MustCompile(`value="([\d\w]+)"`).FindStringSubmatch(html)
-	if len(res) == 0 {
-		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址：https://github.com/rubyangxg/jd-qinglong"+url))
+	cookie := rsp.Header.Get("Set-Cookie")
+	if cookie == "" {
+		return errors.New(jd_cookie.Get("login_fail", "崩了请找作者，仓库地址："+url))
 	}
-	sess.Value = res[1]
+	sess.Value = cookie
 	return nil
 }
 
 func (sess *Session) control(name, value string) error {
 	address := sess.address()
 	req := httplib.Post(address + "/control")
+	req.Header("Cookie", sess.String())
 	req.Param("currId", name)
 	req.Param("currValue", value)
-	req.Param("clientSessionId", sess.String())
 	_, err := req.String()
 	// fmt.Println("controll", name, value, rt)
 	return err
@@ -73,9 +73,9 @@ func (sess *Session) control(name, value string) error {
 func (sess *Session) login(phone, sms_code string) error {
 	address := sess.address()
 	req := httplib.Post(address + "/jdLogin")
+	req.Header("Cookie", sess.String())
 	req.Param("phone", phone)
 	req.Param("sms_code", sms_code)
-	req.Param("clientSessionId", sess.String())
 	_, err := req.String()
 	// fmt.Println(phone, sms_code, rt)
 	return err
@@ -83,7 +83,8 @@ func (sess *Session) login(phone, sms_code string) error {
 
 func (sess *Session) sendAuthCode() error {
 	address := sess.address()
-	req := httplib.Get(address + "/sendAuthCode?clientSessionId=" + sess.String())
+	req := httplib.Get(address + "/sendAuthCode")
+	req.Header("Cookie", sess.String())
 	_, err := req.Response()
 	return err
 }
@@ -95,12 +96,12 @@ func (sess *Session) String() string {
 func (sess *Session) query() (*Query, error) {
 	query := &Query{}
 	address := sess.address()
-	// fmt.Println(sess.String(), "+++")
-	data, err := httplib.Get(fmt.Sprintf("%s/getScreen?clientSessionId=%s", address, sess.String())).Bytes()
+	req := httplib.Get(fmt.Sprintf("%s/getScreen?clientSessionId=%s", address, sess.String()))
+	req.Header("Cookie", sess.String())
+	data, err := req.Bytes()
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Println(string(data))
 	err = json.Unmarshal(data, &query)
 	if err != nil {
 		return nil, err
@@ -143,7 +144,8 @@ func (sess *Session) SmsCode(sms_code string) error {
 
 func (sess *Session) crackCaptcha() error {
 	address := sess.address()
-	req := httplib.Get(fmt.Sprintf("%s/crackCaptcha?clientSessionId=%s", address, sess.String()))
+	req := httplib.Get(fmt.Sprintf("%s/crackCaptcha", address))
+	req.Header("Cookie", sess.String())
 	req.SetTimeout(time.Second*10, time.Second*10)
 	_, err := req.Response()
 	return err
@@ -151,7 +153,8 @@ func (sess *Session) crackCaptcha() error {
 
 func (sess *Session) releaseSession() error {
 	address := sess.address()
-	req := httplib.Get(fmt.Sprintf("%s/releaseSession?clientSessionId=%s", address, sess.String()))
+	req := httplib.Get(fmt.Sprintf("%s/releaseSession", address))
+	req.Header("Cookie", sess.String())
 	_, err := req.Response()
 	return err
 }
