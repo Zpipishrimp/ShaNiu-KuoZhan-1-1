@@ -144,7 +144,7 @@ func (sess *Session) SmsCode(sms_code string) error {
 func (sess *Session) crackCaptcha() error {
 	address := sess.address()
 	req := httplib.Get(fmt.Sprintf("%s/crackCaptcha?clientSessionId=%s", address, sess.String()))
-	req.SetTimeout(time.Second*10, time.Second*10)
+	req.SetTimeout(time.Second*20, time.Second*20)
 	_, err := req.Response()
 	return err
 }
@@ -196,7 +196,7 @@ func init() {
 				go func() {
 					defer delete(codes, id)
 					defer sess.releaseSession()
-					s.Reply("请稍后，正在模拟环境...", core.E)
+					s.Reply("请稍后，正在请求资源...", core.E)
 					for {
 						query, err := sess.query()
 						if err != nil {
@@ -250,7 +250,7 @@ func init() {
 						}
 						if query.PageStatus == "REQUIRE_VERIFY" && !verify {
 							verify = true
-							s.Reply("正在自动验证...", core.E)
+							s.Reply("正在进行滑块验证...", core.E)
 							if err := sess.crackCaptcha(); err != nil {
 								s.Reply(err, core.E)
 								return
