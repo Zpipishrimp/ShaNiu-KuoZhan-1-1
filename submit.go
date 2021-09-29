@@ -137,10 +137,14 @@ func init() {
 					}
 					if len(ck.PtKey) <= 20 {
 						s.Reply("再捣乱我就报警啦！")
+						continue
 					}
 					if !ck.Available() {
-						s.Reply("无效的ck，请重试。")
+						s.Reply("请先到app内设置好账号昵称。")
 						continue
+					}
+					if ck.Nickname == "" {
+						s.Reply("再捣乱我就报警啦！")
 					}
 					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
 					envs, err := qinglong.GetEnvs("JD_COOKIE")
