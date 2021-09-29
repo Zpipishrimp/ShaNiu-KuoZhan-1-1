@@ -46,7 +46,7 @@ func (sess *Session) create() error {
 		return errors.New("未配置服务器地址，仓库地址：" + url)
 	}
 	req := httplib.Get(address)
-	req.SetTimeout(time.Second, time.Second)
+	req.SetTimeout(time.Second*5, time.Second*5)
 	html, err := req.String()
 	if err != nil {
 		return err
