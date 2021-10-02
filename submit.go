@@ -77,7 +77,7 @@ func init() {
 			env := envs[0]
 			env.Value = value
 			if env.Status != 0 {
-				if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+				if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
 					result.Message = err.Error()
 					c.JSON(200, result)
 					return
@@ -177,7 +177,7 @@ func init() {
 						env := envs[0]
 						env.Value = value
 						if env.Status != 0 {
-							if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+							if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
 								s.Reply(err)
 								continue
 							}
@@ -255,7 +255,7 @@ func init() {
 					env := envs[0]
 					env.Value = value
 					if env.Status != 0 {
-						if err := qinglong.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+						if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
 							return err
 						}
 					}

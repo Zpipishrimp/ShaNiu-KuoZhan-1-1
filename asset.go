@@ -33,7 +33,7 @@ var ua = `Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_2 like Mac OS X; en-us) Appl
 
 var assets sync.Map
 var queryAssetLocker sync.Mutex
-var getAsset = func(ck *JdCookie) string {
+var GetAsset = func(ck *JdCookie) string {
 	if asset, ok := assets.Load(ck.PtPin); ok {
 		return asset.(string)
 	}
@@ -58,7 +58,7 @@ func init() {
 		}
 	}()
 	get := func(c chan string, ck JdCookie) {
-		c <- getAsset(&ck)
+		c <- GetAsset(&ck)
 		return
 	}
 	core.AddCommand("jd", []core.Function{
@@ -110,7 +110,7 @@ func init() {
 					s.Reply(strings.Join(rt, "\n\n"))
 				} else {
 					for _, ck := range cks {
-						s.Reply(getAsset(&ck))
+						s.Reply(GetAsset(&ck))
 					}
 				}
 				return nil
@@ -131,7 +131,7 @@ func init() {
 					} {
 						core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 							if string(k) == pt_pin && pt_pin != "" {
-								core.Push(tp, core.Int(string(v)), getAsset(&JdCookie{
+								core.Push(tp, core.Int(string(v)), GetAsset(&JdCookie{
 									PtPin: pt_pin,
 									PtKey: pt_key,
 								}))
@@ -190,7 +190,7 @@ func init() {
 					s.Reply(strings.Join(rt, "\n\n"))
 				} else {
 					for _, ck := range cks {
-						s.Reply(getAsset(&ck))
+						s.Reply(GetAsset(&ck))
 					}
 				}
 				return nil
