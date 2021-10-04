@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/adapter/httplib"
@@ -173,10 +174,10 @@ func init() {
 			Rules: []string{`raw ^(\d{11})$`},
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
-				// if groupCode := jd_cookie.GetInt("groupCode"); !s.IsAdmin() && groupCode != 0 && s.GetChatID() != 0 && groupCode != s.GetChatID() {
-				// 	s.Reply("傻妞已崩溃。")
-				// 	return nil
-				// }
+				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+					s.Reply("傻妞已崩溃。")
+					return nil
+				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
 				}
