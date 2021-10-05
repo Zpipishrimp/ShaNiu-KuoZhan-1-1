@@ -38,7 +38,7 @@ func init() {
 			Cron:  jdWSCK.Get("update", "55 * * * *"),
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				if s.GetImType() == "fake" && !jd_cookie.GetBool("enable auto_update", true) {
+				if s.GetImType() == "fake" && !jd_cookie.GetBool("enable_auto_update", true) {
 					return nil
 				}
 				var cks = map[string]qinglong.Env{}
