@@ -175,7 +175,7 @@ func init() {
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
 				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					s.Reply("傻妞已崩溃。")
+					s.Reply("对不起，短信验证码请求频繁，请稍后再试。")
 					return nil
 				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
