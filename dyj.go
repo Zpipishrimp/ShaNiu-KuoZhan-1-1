@@ -61,7 +61,7 @@ func init() {
 						req.Header("Host", "api.m.jd.com")
 						req.Header("Origin", "https://wbbny.m.jd.com")
 						data, _ := req.String()
-						if strings.Contains(data, "提现") {
+						if strings.Contains(data, "已成功提现") {
 							if s == 1 {
 								s = 2
 							} else {
