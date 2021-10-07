@@ -37,10 +37,10 @@ func init() {
 						if err := qinglong.Config.Req(qinglong.CRONS, qinglong.PUT, "/run", []byte(fmt.Sprintf(`["%s"]`, cron.ID))); err != nil {
 							return err
 						}
-						return "推起来啦。"
+						return "推一推起来啦。"
 					}
 				}
-				return "推不动了。"
+				return "推一推再也不动了。"
 			},
 		},
 	})
