@@ -17,7 +17,7 @@ func init() {
 	core.Server.GET("/gxfc", func(c *gin.Context) {
 		data := jd_cookie.Get("dyj_inviteInfo", "恭喜发财！")
 		c.String(200, data)
-		if data != "" && c.Query("data") == data {
+		if redEnvelopeId := c.Query("redEnvelopeId"); redEnvelopeId != "" && data != "" && strings.Contains(data, redEnvelopeId) {
 			core.NotifyMasters(data)
 			jd_cookie.Set("dyj_inviteInfo", "")
 		}
@@ -65,7 +65,7 @@ func init() {
 							if s == 1 {
 								s = 2
 							} else {
-								httplib.Get(string(decoded) + "?data=" + data).String()
+								httplib.Get(string(decoded) + "?redEnvelopeId=" + redEnvelopeId).String()
 								goto start
 							}
 						}
