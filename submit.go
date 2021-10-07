@@ -140,7 +140,7 @@ func init() {
 						continue
 					}
 					if !ck.Available() {
-						s.Reply("请先到app内设置好账号昵称。")
+						s.Reply("请先到app内设置好账号昵称。") //有瞎编ck的嫌疑
 						continue
 					}
 					if ck.Nickname == "" {
