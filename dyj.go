@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/beego/beego/v2/client/httplib"
@@ -12,14 +13,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var success sync.Map
+
 // to help poor author or do not use this script
 func init() {
+	var hchan = make(chan string)
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			if jd_cookie.Get("dyj_inviteInfo") == "" {
+				jd_cookie.Set("dyj_inviteInfo", <-hchan)
+			}
+		}
+	}()
 	core.Server.GET("/gxfc", func(c *gin.Context) {
-		data := jd_cookie.Get("dyj_inviteInfo", "恭喜发财！")
+		data := jd_cookie.Get("dyj_inviteInfo", "May you be happy and prosperous！")
 		c.String(200, data)
-		if redEnvelopeId := c.Query("redEnvelopeId"); redEnvelopeId != "" && data != "" && strings.Contains(data, redEnvelopeId) {
-			core.NotifyMasters(data)
-			jd_cookie.Set("dyj_inviteInfo", "")
+		if redEnvelopeId := c.Query("redEnvelopeId"); redEnvelopeId != "" {
+			if _, ok := success.Load(redEnvelopeId); !ok {
+				success.Store(redEnvelopeId, true)
+				core.NotifyMasters(data)
+				jd_cookie.Set("dyj_inviteInfo", "")
+			}
 		}
 	})
 	core.AddCommand("", []core.Function{
@@ -27,8 +42,10 @@ func init() {
 			Rules: []string{`raw redEnvelopeId=([^&]+)&inviterId=([^&]+)&`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				jd_cookie.Set("dyj_inviteInfo", fmt.Sprintf("redEnvelopeId=%s;inviterId=%s;", s.Get(0), s.Get(1)))
-				return "恭喜发财。"
+				go func() {
+					hchan <- fmt.Sprintf("redEnvelopeId=%s;inviterId=%s;", s.Get(0), s.Get(1))
+				}()
+				return "May you be happy and prosperous!"
 			},
 		},
 	})
