@@ -18,6 +18,7 @@ var pin = func(class string) core.Bucket {
 }
 
 func init() {
+	//
 	core.Server.POST("/cookie", func(c *gin.Context) {
 		cookie := c.Query("ck")
 		ck := &JdCookie{
