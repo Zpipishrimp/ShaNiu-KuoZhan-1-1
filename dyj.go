@@ -77,7 +77,13 @@ func init() {
 					continue
 				}
 				s := 1
-				for i := 0; i < len(envs); i++ {
+				l := len(envs)
+				n := time.Now().Unix()
+				for j := 0; j < l; j++ {
+					i := j
+					if n%2 == 0 {
+						i = l - j - 1
+					}
 					if envs[i].Status == 0 {
 						req := httplib.Get("https://api.m.jd.com/?functionId=openRedEnvelopeInteract&body=" + `{"linkId":"yMVR-_QKRd2Mq27xguJG-w","redEnvelopeId":"` + redEnvelopeId + `","inviter":"` + inviterId + `","helpType":"` + fmt.Sprint(s) + `"}` + "&t=" + fmt.Sprint(time.Now().Unix()) + "&appid=activities_platform&clientVersion=3.5.6")
 						req.Header("Cookie", envs[i].Value)
