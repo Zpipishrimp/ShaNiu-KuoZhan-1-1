@@ -41,7 +41,7 @@ func init() {
 		}
 		if _, ok := success.Load(redEnvelopeId); !ok {
 			success.Store(redEnvelopeId, true)
-			core.NotifyMasters(data)
+			core.NotifyMasters(redEnvelopeId)
 		}
 	})
 	core.AddCommand("", []core.Function{
