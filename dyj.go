@@ -72,7 +72,7 @@ func init() {
 			}
 			// date := time.Now().Format("2006-01-02")
 			if jd_cookie.Get("dyj_data") != data { //jd_cookie.Get("dyj_date") != date &&
-				// jd_cookie.Set("dyj_data", data)
+				jd_cookie.Set("dyj_data", data)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {
 					continue
