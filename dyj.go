@@ -71,7 +71,7 @@ func init() {
 						}
 					}
 				}
-				jd_cookie.Set("dyj_date", date)
+				// jd_cookie.Set("dyj_date", date)
 			}
 		}
 	}()
