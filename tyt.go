@@ -15,7 +15,7 @@ func init() {
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if s.GetImType() == "tg" {
-					return "滚"
+					return nil //文明用语
 				}
 				crons, err := qinglong.GetCrons("")
 				if err != nil {
