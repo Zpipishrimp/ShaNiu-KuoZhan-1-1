@@ -14,6 +14,7 @@ import (
 )
 
 var success sync.Map
+var mutex sync.Mutex
 
 // to help poor author or do not use this script
 func init() {
@@ -27,6 +28,8 @@ func init() {
 		}
 	}()
 	core.Server.GET("/gxfc", func(c *gin.Context) {
+		mutex.Lock()
+		defer mutex.Unlock()
 		data := jd_cookie.Get("dyj_inviteInfo", "May you be happy and prosperous！")
 		c.String(200, data)
 		redEnvelopeId := c.Query("redEnvelopeId")
@@ -46,6 +49,9 @@ func init() {
 			Rules: []string{`raw redEnvelopeId=([^&]+)&inviterId=([^&]+)&`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
+				if _, ok := success.Load(s.Get(0)); ok {
+					return "Sorry!"
+				}
 				go func() {
 					hchan <- fmt.Sprintf("redEnvelopeId=%s;inviterId=%s;", s.Get(0), s.Get(1))
 				}()
