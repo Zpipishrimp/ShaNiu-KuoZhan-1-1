@@ -102,6 +102,7 @@ func init() {
 							}
 						}
 					}
+					time.Sleep(time.Second)
 				}
 				// jd_cookie.Set("dyj_date", date)
 			}
