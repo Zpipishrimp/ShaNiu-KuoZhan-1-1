@@ -29,12 +29,16 @@ func init() {
 	core.Server.GET("/gxfc", func(c *gin.Context) {
 		data := jd_cookie.Get("dyj_inviteInfo", "May you be happy and prosperous！")
 		c.String(200, data)
-		if redEnvelopeId := c.Query("redEnvelopeId"); redEnvelopeId != "" && strings.Contains(data, redEnvelopeId) {
-			if _, ok := success.Load(redEnvelopeId); !ok {
-				success.Store(redEnvelopeId, true)
-				core.NotifyMasters(data)
-				jd_cookie.Set("dyj_inviteInfo", "")
-			}
+		redEnvelopeId := c.Query("redEnvelopeId")
+		if redEnvelopeId == "" {
+			return
+		}
+		if strings.Contains(data, redEnvelopeId) {
+			jd_cookie.Set("dyj_inviteInfo", "")
+		}
+		if _, ok := success.Load(redEnvelopeId); !ok {
+			success.Store(redEnvelopeId, true)
+			core.NotifyMasters(data)
 		}
 	})
 	core.AddCommand("", []core.Function{
