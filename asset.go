@@ -147,6 +147,9 @@ func init() {
 		{
 			Rules: []string{`raw ^查询$`},
 			Handle: func(s core.Sender) interface{} {
+				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+					return nil
+				}
 				s.Disappear(time.Second * 40)
 				envs, err := qinglong.GetEnvs("JD_COOKIE")
 				if err != nil {

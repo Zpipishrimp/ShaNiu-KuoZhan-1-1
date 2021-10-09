@@ -175,7 +175,6 @@ func init() {
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
 				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					s.Reply("对不起，短信验证码请求频繁，请稍后再试。")
 					return nil
 				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
@@ -338,10 +337,7 @@ func init() {
 		{
 			Rules: []string{`raw ^登录$`},
 			Handle: func(s core.Sender) interface{} {
-				if groupCode := jd_cookie.GetInt("groupCode"); !s.IsAdmin() && groupCode != 0 && s.GetChatID() != 0 && groupCode != s.GetChatID() {
-					s.Delete()
-					s.Disappear()
-					s.Reply("我崩溃了。")
+				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					return nil
 				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
@@ -358,6 +354,9 @@ func init() {
 		{
 			Rules: []string{`raw ^登陆$`},
 			Handle: func(s core.Sender) interface{} {
+				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+					return nil
+				}
 				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
 					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
 				}
@@ -375,6 +374,9 @@ func init() {
 			Rules: []string{`raw ^(\d{6})$`},
 			Handle: func(s core.Sender) interface{} {
 				s.Delete()
+				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+					return nil
+				}
 				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
 					code <- s.Get()
 					if s.GetImType() == "wxmp" {
