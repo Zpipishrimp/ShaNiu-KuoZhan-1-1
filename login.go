@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/adapter/httplib"
@@ -170,223 +169,206 @@ func init() {
 		}
 	})
 	core.AddCommand("", []core.Function{
-		{
-			Rules: []string{`raw ^(\d{11})$`},
-			Handle: func(s core.Sender) interface{} {
-				s.Delete()
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					return nil
-				}
-				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
-					return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
-				}
-				id := s.GetImType() + fmt.Sprint(s.GetUserID())
-				if _, ok := codes[id]; ok {
-					return "你已在登录中。"
-				}
-				c := make(chan string, 1)
-				codes[id] = c
-				var sess = new(Session)
-				phone := s.Get()
-				err := sess.create()
-				if err != nil {
-					delete(codes, id)
-					return err
-				}
-				go func() {
-					defer delete(codes, id)
-					defer sess.releaseSession()
-					s.Reply("请稍后，正在请求资源...", core.E)
-					for {
-						query, err := sess.query()
-						if err != nil {
-							s.Reply(err, core.E)
-							return
-						}
-						if query.PageStatus == "NORMAL" {
-							break
-						}
-						if query.PageStatus == "SESSION_EXPIRED" {
-							sess.create()
-						}
-						time.Sleep(time.Second)
-					}
-					err = sess.control("phone", phone)
-					if err != nil {
-						s.Reply(err, core.E)
-						return
-					}
-					send := false
-					login := false
-					verify := false
-					success := false
-					sms_code := ""
-					for {
-						query, err := sess.query()
-						if err != nil {
-							s.Reply(err, core.E)
-							return
-						}
-						if query.PageStatus == "SESSION_EXPIRED" {
-							if !login {
-								s.Reply(errors.New("登录超时。"), core.E)
-							}
-							return
-						}
-						if query.SessionTimeOut == 0 {
-							if success {
-								return
-							}
-							s.Reply(errors.New("登录超时。"), core.E)
-							return
-						}
-						if query.CanClickLogin && !login {
-							s.Reply("正在登录...", core.E)
-							if err := sess.login(phone, sms_code); err != nil {
-								s.Reply(err, core.E)
-								return
-							}
-							login = true
-						}
-						if query.PageStatus == "REQUIRE_VERIFY" && !verify {
-							verify = true
-							s.Reply("正在进行滑块验证...", core.E)
-							if err := sess.crackCaptcha(); err != nil {
-								s.Reply(err, core.E)
-								return
-							}
-							s.Reply("验证通过。", core.E)
-							s.Reply("请输入验证码______", core.E)
-							timeout := 1
-							for {
-								select {
-								case sms_code = <-c:
-									s.Reply("正在提交验证码...", core.E)
-									if err := sess.SmsCode(sms_code); err != nil {
-										s.Reply(err, core.E)
-										return
-									}
-									s.Reply("验证码提交成功。", core.E)
-									goto HELL
-								case <-time.After(time.Millisecond * 300):
-									query, err := sess.query()
-									if err != nil {
-										s.Reply(err, core.E)
-										return
-									}
-									if query.PageStatus == "SESSION_EXPIRED" {
-										goto HELL
-									}
-									if query.PageStatus == "VERIFY_FAILED_MAX" {
-										s.Reply("验证码错误次数过多，请重新获取。", core.E)
-										return
-									}
-									if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
-										s.Reply("对不起，短信验证码请求频繁，请稍后再试。", core.E)
-										return
-									}
-									if query.AuthCodeCountDown <= 0 {
-										timeout++
-										if timeout > 20 {
-											s.Reply("验证码超时，登录失败。", core.E)
-											return
-										}
-									}
-								}
-							}
-						HELL:
-						}
-						if query.CanSendAuth && !send {
-							if err := sess.sendAuthCode(); err != nil {
-								s.Reply(err, core.E)
-								return
-							}
-							send = true
-						}
-						if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
+		// {
+		// 	Rules: []string{`raw ^(\d{11})$`},
+		// 	Handle: func(s core.Sender) interface{} {
+		// 		s.Delete()
+		// 		if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+		// 			return nil
+		// 		}
+		// 		if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
+		// 			return fmt.Sprintf("%v坑位全部在使用中，请排队。", num)
+		// 		}
+		// 		id := s.GetImType() + fmt.Sprint(s.GetUserID())
+		// 		if _, ok := codes[id]; ok {
+		// 			return "你已在登录中。"
+		// 		}
+		// 		c := make(chan string, 1)
+		// 		codes[id] = c
+		// 		var sess = new(Session)
+		// 		phone := s.Get()
+		// 		err := sess.create()
+		// 		if err != nil {
+		// 			delete(codes, id)
+		// 			return err
+		// 		}
+		// 		go func() {
+		// 			defer delete(codes, id)
+		// 			defer sess.releaseSession()
+		// 			s.Reply("请稍后，正在请求资源...", core.E)
+		// 			for {
+		// 				query, err := sess.query()
+		// 				if err != nil {
+		// 					s.Reply(err, core.E)
+		// 					return
+		// 				}
+		// 				if query.PageStatus == "NORMAL" {
+		// 					break
+		// 				}
+		// 				if query.PageStatus == "SESSION_EXPIRED" {
+		// 					sess.create()
+		// 				}
+		// 				time.Sleep(time.Second)
+		// 			}
+		// 			err = sess.control("phone", phone)
+		// 			if err != nil {
+		// 				s.Reply(err, core.E)
+		// 				return
+		// 			}
+		// 			send := false
+		// 			login := false
+		// 			verify := false
+		// 			success := false
+		// 			sms_code := ""
+		// 			for {
+		// 				query, err := sess.query()
+		// 				if err != nil {
+		// 					s.Reply(err, core.E)
+		// 					return
+		// 				}
+		// 				if query.PageStatus == "SESSION_EXPIRED" {
+		// 					if !login {
+		// 						s.Reply(errors.New("登录超时。"), core.E)
+		// 					}
+		// 					return
+		// 				}
+		// 				if query.SessionTimeOut == 0 {
+		// 					if success {
+		// 						return
+		// 					}
+		// 					s.Reply(errors.New("登录超时。"), core.E)
+		// 					return
+		// 				}
+		// 				if query.CanClickLogin && !login {
+		// 					s.Reply("正在登录...", core.E)
+		// 					if err := sess.login(phone, sms_code); err != nil {
+		// 						s.Reply(err, core.E)
+		// 						return
+		// 					}
+		// 					login = true
+		// 				}
+		// 				if query.PageStatus == "REQUIRE_VERIFY" && !verify {
+		// 					verify = true
+		// 					s.Reply("正在进行滑块验证...", core.E)
+		// 					if err := sess.crackCaptcha(); err != nil {
+		// 						s.Reply(err, core.E)
+		// 						return
+		// 					}
+		// 					s.Reply("验证通过。", core.E)
+		// 					s.Reply("请输入验证码______", core.E)
+		// 					timeout := 1
+		// 					for {
+		// 						select {
+		// 						case sms_code = <-c:
+		// 							s.Reply("正在提交验证码...", core.E)
+		// 							if err := sess.SmsCode(sms_code); err != nil {
+		// 								s.Reply(err, core.E)
+		// 								return
+		// 							}
+		// 							s.Reply("验证码提交成功。", core.E)
+		// 							goto HELL
+		// 						case <-time.After(time.Millisecond * 300):
+		// 							query, err := sess.query()
+		// 							if err != nil {
+		// 								s.Reply(err, core.E)
+		// 								return
+		// 							}
+		// 							if query.PageStatus == "SESSION_EXPIRED" {
+		// 								goto HELL
+		// 							}
+		// 							if query.PageStatus == "VERIFY_FAILED_MAX" {
+		// 								s.Reply("验证码错误次数过多，请重新获取。", core.E)
+		// 								return
+		// 							}
+		// 							if query.PageStatus == "VERIFY_CODE_MAX" || query.PageStatus == "SWITCH_SMS_LOGIN" {
+		// 								s.Reply("对不起，短信验证码请求频繁，请稍后再试。", core.E)
+		// 								return
+		// 							}
+		// 							if query.AuthCodeCountDown <= 0 {
+		// 								timeout++
+		// 								if timeout > 20 {
+		// 									s.Reply("验证码超时，登录失败。", core.E)
+		// 									return
+		// 								}
+		// 							}
+		// 						}
+		// 					}
+		// 				HELL:
+		// 				}
+		// 				if query.CanSendAuth && !send {
+		// 					if err := sess.sendAuthCode(); err != nil {
+		// 						s.Reply(err, core.E)
+		// 						return
+		// 					}
+		// 					send = true
+		// 				}
+		// 				if !query.CanSendAuth && query.AuthCodeCountDown > 0 {
 
-						}
-						if query.AuthCodeCountDown == -1 && send {
+		// 				}
+		// 				if query.AuthCodeCountDown == -1 && send {
 
-						}
-						if query.PageStatus == "SUCCESS_CK" && !success {
-							cookie := fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
-							qq := ""
-							if s.GetImType() == "qq" {
-								qq = fmt.Sprint(s.GetUserID())
-							}
-							xdd(cookie, qq)
-							core.Senders <- &core.Faker{
-								Message: cookie,
-								UserID:  s.GetUserID(),
-								Type:    s.GetImType(),
-							}
-							s.Reply("登录成功，你可以登录下一个账号。", core.E)
-							success = true
-							return
-						}
-						time.Sleep(time.Second)
-					}
-				}()
-				if s.GetImType() == "wxmp" {
-					return "一会儿收到验证码发给我哦～"
-				}
-				return nil
-			},
-		},
+		// 				}
+		// 				if query.PageStatus == "SUCCESS_CK" && !success {
+		// 					cookie := fmt.Sprintf("pt_key=%v;pt_pin=%v;", query.Ck.PtKey, query.Ck.PtPin)
+		// 					qq := ""
+		// 					if s.GetImType() == "qq" {
+		// 						qq = fmt.Sprint(s.GetUserID())
+		// 					}
+		// 					xdd(cookie, qq)
+		// 					core.Senders <- &core.Faker{
+		// 						Message: cookie,
+		// 						UserID:  s.GetUserID(),
+		// 						Type:    s.GetImType(),
+		// 					}
+		// 					s.Reply("登录成功，你可以登录下一个账号。", core.E)
+		// 					success = true
+		// 					return
+		// 				}
+		// 				time.Sleep(time.Second)
+		// 			}
+		// 		}()
+		// 		if s.GetImType() == "wxmp" {
+		// 			return "一会儿收到验证码发给我哦～"
+		// 		}
+		// 		return nil
+		// 	},
+		// },
 		{
-			Rules: []string{`raw ^登录$`},
+			Rules: []string{`raw ^登录$`, `raw ^登陆$`},
 			Handle: func(s core.Sender) interface{} {
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					return nil
-				}
-				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
-					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
-				}
-				id := s.GetImType() + fmt.Sprint(s.GetUserID())
-				if _, ok := codes[id]; ok {
-					return "你已在登录中。"
-				}
-				s.Reply("请输入手机号___________")
-				return nil
-			},
-		},
-		{
-			Rules: []string{`raw ^登陆$`},
-			Handle: func(s core.Sender) interface{} {
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					return nil
-				}
-				if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
-					return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
-				}
-				id := s.GetImType() + fmt.Sprint(s.GetUserID())
-				if _, ok := codes[id]; ok {
-					return "你已在登录中。"
-				}
-				s.Reply("你要登上敌方的陆地？")
-				s.Reply("请输入手机号___________", time.Duration(time.Second*5))
-				return nil
+				// if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+				// 	return nil
+				// }
+				// if num := jd_cookie.GetInt("login_num", 2); len(codes) >= num {
+				// 	return fmt.Sprintf("%v坑位全部在使用中，请排队(稍后再试)。", num)
+				// }
+				// id := s.GetImType() + fmt.Sprint(s.GetUserID())
+				// if _, ok := codes[id]; ok {
+				// 	return "你已在登录中。"
+				// }
+				// s.Reply("请输入手机号___________")
+				// return nil
+				return jd_cookie.Get("tip", "暂时无法使用短信登录。")
 			},
 		},
 
-		{
-			Rules: []string{`raw ^(\d{6})$`},
-			Handle: func(s core.Sender) interface{} {
-				s.Delete()
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
-					return nil
-				}
-				if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
-					code <- s.Get()
-					if s.GetImType() == "wxmp" {
-						s.Reply("八九不离十登录成功了，一分钟后对我说\"查询\"确认是否登录成功。")
-					}
-				} else {
-					s.Reply("验证码不存在或过期了。")
-				}
-				return nil
-			},
-		},
+		// {
+		// 	Rules: []string{`raw ^(\d{6})$`},
+		// 	Handle: func(s core.Sender) interface{} {
+		// 		s.Delete()
+		// 		if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+		// 			return nil
+		// 		}
+		// 		if code, ok := codes[s.GetImType()+fmt.Sprint(s.GetUserID())]; ok {
+		// 			code <- s.Get()
+		// 			if s.GetImType() == "wxmp" {
+		// 				s.Reply("八九不离十登录成功了，一分钟后对我说\"查询\"确认是否登录成功。")
+		// 			}
+		// 		} else {
+		// 			s.Reply("验证码不存在或过期了。")
+		// 		}
+		// 		return nil
+		// 	},
+		// },
 	})
 }
