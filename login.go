@@ -18,7 +18,16 @@ func init() {
 				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					return nil
 				}
-				return jd_cookie.Get("tip", "暂时无法使用短信登录。")
+				tip := jd_cookie.Get("tip")
+
+				if tip == "" {
+					if s.IsAdmin() {
+						return jd_cookie.Get("tip", "阿东不行啦，更改登录提示指令，set jd_cookie tip ?")
+					} else {
+						tip = "暂时无法使用短信登录。"
+					}
+				}
+				return tip
 			},
 		},
 	})
