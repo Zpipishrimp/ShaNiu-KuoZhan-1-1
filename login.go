@@ -18,8 +18,8 @@ func init() {
 				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					return nil
 				}
+				// 	if c == nil {
 				tip := jd_cookie.Get("tip")
-
 				if tip == "" {
 					if s.IsAdmin() {
 						return jd_cookie.Get("tip", "阿东不行啦，更改登录提示指令，set jd_cookie tip ?")
@@ -27,7 +27,47 @@ func init() {
 						tip = "暂时无法使用短信登录。"
 					}
 				}
+
 				return tip
+				// 	}
+				// 	uid := s.GetUserID()
+				// 	stop := false
+				// 	go func() {
+				// 		for {
+
+				// 		}
+				// 	}()
+				// 	for {
+				// 		if stop == true {
+				// 			break
+				// 		}
+				// 		s.Await(s, func(s core.Sender) interface{} {
+				// 			msg := s.GetContent()
+				// 			if strings.Contains(msg, "退出") {
+				// 				stop = true
+				// 				return nil
+				// 			}
+				// 			c.WriteJSON(map[string]interface{}{
+				// 				"time":         time.Now().Unix(),
+				// 				"self_id":      uid,
+				// 				"post_type":    "message",
+				// 				"message_type": "private",
+				// 				"sub_type":     "friend",
+				// 				"message_id":   s.GetMessageID(),
+				// 				"user_id":      12345678,
+				// 				"message":      s.GetContent(),
+				// 				"raw_message":  s.GetContent(),
+				// 				"font":         456,
+				// 				"sender": map[string]interface{}{
+				// 					"nickname": "傻妞",
+				// 					"sex":      "female",
+				// 					"age":      18,
+				// 				},
+				// 			})
+				// 			return nil
+				// 		}, `[\s\S]+`)
+				// 	}
+				// 	return "已退出登录模式"
 			},
 		},
 	})
