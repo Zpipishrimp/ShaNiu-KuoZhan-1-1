@@ -8,8 +8,8 @@ import (
 func init() {
 	core.Server.Any("/adong", func(c *gin.Context) {
 		core.Senders <- &core.Faker{
-			Message: c.Query("ck"),
-			UserID:  c.Query("qq"),
+			Message: c.PostForm("ck"),
+			UserID:  c.PostForm("qq"),
 			Type:    "qq",
 		}
 	})
