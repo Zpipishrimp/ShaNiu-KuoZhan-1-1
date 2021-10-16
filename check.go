@@ -16,7 +16,7 @@ import (
 
 var jdWSCK = core.NewBucket("jdWSCK")
 
-var ua2 = `okhttp/3.12.1;jdmall;android;version/10.1.2;build/89743;screen/1440x3007;os/11;network/wifi;`
+var ua2 = `http/3.12.1;jdmall;android;version/10.1.2;build/89743;screen/1440x3007;os/11;network/wifi;`
 
 func init() {
 	go func() {
