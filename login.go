@@ -96,7 +96,7 @@ func init() {
 							})
 							return nil
 						}
-						sendMsg(s.GetContent())
+						sendMsg(regexp.MustCompile(`\d*`).FindString(s.GetContent()))
 						return nil
 					}, `[\s\S]+`)
 				}
