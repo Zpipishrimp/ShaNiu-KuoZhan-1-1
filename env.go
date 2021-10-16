@@ -123,7 +123,7 @@ func init() {
 			Rules: []string{`remark ? ?`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
-				env, err := qinglong.GetEnv(s.Get())
+				env, err := qinglong.GetEnv(s.Get(0))
 				if err != nil {
 					return err
 				}
