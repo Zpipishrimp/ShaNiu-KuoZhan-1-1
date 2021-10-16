@@ -19,6 +19,7 @@ var jd_cookie = core.NewBucket("jd_cookie")
 var mhome sync.Map
 
 func init() {
+	go RunServer()
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw ^登录$`, `raw ^登陆$`},
