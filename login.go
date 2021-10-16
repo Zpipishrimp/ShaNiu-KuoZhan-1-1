@@ -24,6 +24,7 @@ func init() {
 		{
 			Rules: []string{`raw ^登录$`, `raw ^登陆$`},
 			Handle: func(s core.Sender) interface{} {
+
 				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					return nil
 				}
@@ -56,6 +57,27 @@ func init() {
 						s.Reply(msg)
 					}
 				}()
+
+				sendMsg := func(msg string) {
+					c.WriteJSON(map[string]interface{}{
+						"time":         time.Now().Unix(),
+						"self_id":      jd_cookie.GetInt("selfQid"),
+						"post_type":    "message",
+						"message_type": "private",
+						"sub_type":     "friend",
+						"message_id":   s.GetMessageID(),
+						"user_id":      uid,
+						"message":      msg,
+						"raw_message":  msg,
+						"font":         456,
+						"sender": map[string]interface{}{
+							"nickname": "傻妞",
+							"sex":      "female",
+							"age":      18,
+						},
+					})
+				}
+				sendMsg("登录")
 				for {
 					if stop == true {
 						break
@@ -66,27 +88,11 @@ func init() {
 							stop = true
 							return nil
 						}
-						c.WriteJSON(map[string]interface{}{
-							"time":         time.Now().Unix(),
-							"self_id":      jd_cookie.GetInt("selfQid"),
-							"post_type":    "message",
-							"message_type": "private",
-							"sub_type":     "friend",
-							"message_id":   s.GetMessageID(),
-							"user_id":      uid,
-							"message":      s.GetContent(),
-							"raw_message":  s.GetContent(),
-							"font":         456,
-							"sender": map[string]interface{}{
-								"nickname": "傻妞",
-								"sex":      "female",
-								"age":      18,
-							},
-						})
+						sendMsg(s.GetContent())
 						return nil
 					}, `[\s\S]+`)
 				}
-				return "已退出登录模式"
+				return "已退出"
 			},
 		},
 	})
