@@ -103,7 +103,7 @@ func RunServer() {
 		time.Sleep(time.Second * 2)
 		RunServer()
 	}()
-	u := url.URL{Scheme: "ws", Host: addr, Path: "/wx/event"}
+	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws/event"}
 	logs.Info("连接阿东 %s", u.String())
 	var err error
 	c, _, err = websocket.DefaultDialer.Dial(u.String(), http.Header{
@@ -112,6 +112,7 @@ func RunServer() {
 	})
 	if err != nil {
 		logs.Warn("连接阿东错误:", err)
+		return
 	}
 	defer c.Close()
 	go func() {
