@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -84,8 +85,15 @@ func init() {
 					}
 					s.Await(s, func(s core.Sender) interface{} {
 						msg := s.GetContent()
-						if strings.Contains(msg, "退出") {
-							stop = true
+						if regexp.MustCompile(`\d{11}`).FindString(msg) == "" || regexp.MustCompile(`\d{6}`).FindString(msg) == "" {
+							s.Reply("正在登录是否退出？[Y/n]")
+							s.Await(s, func(s core.Sender) interface{} {
+								msg := s.GetContent()
+								if strings.ToLower(msg) == "y" || strings.ToLower(msg) == "yes" {
+									stop = true
+								}
+								return nil
+							})
 							return nil
 						}
 						sendMsg(s.GetContent())
