@@ -65,7 +65,7 @@ func init() {
 						"post_type":    "message",
 						"message_type": "private",
 						"sub_type":     "friend",
-						"message_id":   s.GetMessageID(),
+						"message_id":   time.Now().UnixNano(),
 						"user_id":      uid,
 						"message":      msg,
 						"raw_message":  msg,
