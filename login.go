@@ -91,6 +91,8 @@ func init() {
 								msg := s.GetContent()
 								if strings.ToLower(msg) == "y" || strings.ToLower(msg) == "yes" {
 									stop = true
+								} else {
+									s.Reply("请继续登录。")
 								}
 								return nil
 							})
