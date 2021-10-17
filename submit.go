@@ -253,15 +253,14 @@ func init() {
 					}
 					return ck.Nickname + ",添加成功。"
 				} else {
-					env := envs[0]
-					env.Value = value
-					if env.Status != 0 {
-						if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+env.ID+`"]`)); err != nil {
+					envWsCK.Value = value
+					if envWsCK.Status != 0 {
+						if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+envWsCK.ID+`"]`)); err != nil {
 							return err
 						}
 					}
-					env.Status = 0
-					if err := qinglong.UdpEnv(env); err != nil {
+					envWsCK.Status = 0
+					if err := qinglong.UdpEnv(*envWsCK); err != nil {
 						return err
 					}
 					return ck.Nickname + ",更新成功。"
