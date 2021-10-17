@@ -1262,7 +1262,7 @@ func (ck *JdCookie) Available() bool {
 		}
 		return true
 	}
-	return av2(ck)
+	return av3(ck)
 }
 
 func av2(ck *JdCookie) bool {
@@ -1281,6 +1281,29 @@ func av2(ck *JdCookie) bool {
 	}
 	ck.Nickname, _ = jsonparser.GetString(data, "nickname")
 	return ck.Nickname != ""
+}
+
+func av3(ck *JdCookie) bool {
+	req := httplib.Get(`https://wq.jd.com/user_new/info/GetJDUserInfoUnion?sceneval=2`)
+	req.Header("User-Agent", ua())
+	req.Header("Host", "wq.jd.com")
+	req.Header("Accept", "*/*")
+	req.Header("Connection", "keep-alive")
+	req.Header("Accept-Language", "zh-cn")
+	req.Header("Accept-Encoding", "gzip, deflate, br")
+	req.Header("Referer", "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&")
+	req.Header("Cookie", "pt_key="+ck.PtKey+";pt_pin="+ck.PtPin+";")
+	data, err := req.Bytes()
+	if err != nil {
+		return false
+	}
+	ck.Nickname, _ = jsonparser.GetString(data, "data", "userInfo", "baseInfo", "nickname")
+	ck.BeanNum, _ = jsonparser.GetString(data, "data", "assetInfo", "beanNum")
+	if ck.Nickname != "" {
+		return true
+	} else {
+		return av2(ck)
+	}
 }
 
 type UserInfoResult struct {
