@@ -141,11 +141,11 @@ func init() {
 						continue
 					}
 					if !ck.Available() {
-						s.Reply("请先到app内设置好账号昵称。") //有瞎编ck的嫌疑
+						s.Reply("无效的账号。") //有瞎编ck的嫌疑
 						continue
 					}
 					if ck.Nickname == "" {
-						s.Reply("再捣乱我就报警啦！")
+						s.Reply("请修改昵称！")
 					}
 					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
 					envs, err := qinglong.GetEnvs("JD_COOKIE")
