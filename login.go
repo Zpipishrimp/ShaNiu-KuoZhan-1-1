@@ -106,6 +106,14 @@ func init() {
 			},
 		},
 	})
+	if jd_cookie.GetBool("enable_aaron", false) {
+		core.Senders <- &core.Faker{
+			Message: "ql cron disable https://github.com/Aaron-lv/sync.git",
+		}
+		core.Senders <- &core.Faker{
+			Message: "ql cron disable task Aaron-lv_sync_jd_scripts_jd_city.js",
+		}
+	}
 }
 
 var c *websocket.Conn
