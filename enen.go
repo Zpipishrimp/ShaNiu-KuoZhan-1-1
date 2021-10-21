@@ -13,6 +13,7 @@ func init() {
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{"enen ?"},
+			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				req := httplib.Get("https://plogin.m.jd.com/cgi-bin/ml/mlogout?appid=300&returnurl=https%3A%2F%2Fm.jd.com%2F")
 				req.Header("authority", "plogin.m.jd.com")
@@ -25,6 +26,7 @@ func init() {
 		},
 		{
 			Rules: []string{"eueu ?"},
+			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				envs, err := qinglong.GetEnvs("JD_WSCK")
 				if err != nil {
