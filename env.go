@@ -90,6 +90,10 @@ func init() {
 					return "找不到对应的变量，无法交换顺序。"
 				}
 				toe[0].ID, toe[1].ID = toe[1].ID, toe[0].ID
+				toe[0].Timestamp = ""
+				toe[1].Timestamp = ""
+				toe[0].Created = 0
+				toe[1].Created = 0
 				if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, toe[0]); err != nil {
 					return err
 				}
