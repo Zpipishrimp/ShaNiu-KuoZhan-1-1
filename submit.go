@@ -60,6 +60,7 @@ func init() {
 			}
 		}
 		if !find {
+
 			if err := qinglong.AddEnv(qinglong.Env{
 				Name:  "JD_COOKIE",
 				Value: value,
@@ -83,12 +84,12 @@ func init() {
 					c.JSON(200, result)
 					return
 				}
-			}
-			env.Status = 0
-			if err := qinglong.UdpEnv(env); err != nil {
-				result.Message = err.Error()
-				c.JSON(200, result)
-				return
+				env.Status = 0
+				if err := qinglong.UdpEnv(env); err != nil {
+					result.Message = err.Error()
+					c.JSON(200, result)
+					return
+				}
 			}
 			rt := ck.Nickname + "，更新成功。"
 			core.NotifyMasters(rt)
@@ -258,10 +259,10 @@ func init() {
 						if err := qinglong.Config.Req(qinglong.PUT, qinglong.ENVS, "/enable", []byte(`["`+envWsCK.ID+`"]`)); err != nil {
 							return err
 						}
-					}
-					envWsCK.Status = 0
-					if err := qinglong.UdpEnv(*envWsCK); err != nil {
-						return err
+						envWsCK.Status = 0
+						if err := qinglong.UdpEnv(*envWsCK); err != nil {
+							return err
+						}
 					}
 					return ck.Nickname + ",更新成功。"
 				}
