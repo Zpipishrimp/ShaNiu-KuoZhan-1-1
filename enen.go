@@ -20,7 +20,6 @@ func init() {
 				req.Header("cookie", s.Get())
 				req.Header("host", "jd.com")
 				req.Response()
-				s.Disappear()
 				return "已注销登录"
 			},
 		},
@@ -35,7 +34,6 @@ func init() {
 				for _, env := range envs {
 					if strings.Contains(env.Value, s.Get()) {
 						yes = true
-						// s.Reply(env.Value)
 						pin := core.FetchCookieValue("pin", env.Value)
 						pt_key, err := getKey(env.Value)
 						if err != nil {
